@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "core.model": "1.0.0",
+    "core.database": "1.0.0",
+    "core.base": "1.0.0",
+    "core.ui": "1.0.0",
+    "core.util": "1.0.0"
+  }
+}

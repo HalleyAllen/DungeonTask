@@ -1,10 +1,21 @@
 {
   "name": "entry",
   "version": "1.0.0",
-  "description": "Please describe the basic information.",
+  "description": "DungeonTask - 日常记录与自我管理应用",
   "main": "",
   "author": "",
   "license": "",
-  "dependencies": {}
+  "dependencies": {
+    "core.model": "1.0.0",
+    "core.database": "1.0.0",
+    "core.util": "1.0.0",
+    "core.base": "1.0.0",
+    "core.ui": "1.0.0",
+    "feature.task": "1.0.0",
+    "feature.fitness": "1.0.0",
+    "feature.sentence": "1.0.0",
+    "feature.word": "1.0.0",
+    "feature.goal": "1.0.0",
+    "feature.memo": "1.0.0"
+  }
 }
-
