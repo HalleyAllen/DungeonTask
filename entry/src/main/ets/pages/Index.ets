@@ -2,12 +2,8 @@
  * 主页面 - 底部 Tab 导航
  */
 import { router } from '@kit.ArkUI';
-import { TaskPage } from 'feature.task';
-import { FitnessPage } from 'feature.fitness';
-import { SentencePage } from 'feature.sentence';
-import { WordPage } from 'feature.word';
-import { GoalPage } from 'feature.goal';
-import { MemoPage } from 'feature.memo';
+// import { TaskPage } from 'feature.task';
+// import { MemoPage } from 'feature.memo';
 
 @Entry
 @Component
@@ -17,34 +13,24 @@ struct Index {
   build() {
     Tabs({ barPosition: BarPosition.End, controller: this.tabController }) {
       TabContent() {
-        TaskPage()
       }
       .tabBar(this.tabBarItem('任务', '📋', 0))
 
       TabContent() {
-        FitnessPage()
       }
       .tabBar(this.tabBarItem('健身', '💪', 1))
 
       TabContent() {
-        SentencePage()
       }
       .tabBar(this.tabBarItem('句子', '💬', 2))
 
       TabContent() {
-        WordPage()
       }
       .tabBar(this.tabBarItem('词语', '📖', 3))
 
       TabContent() {
-        GoalPage()
       }
-      .tabBar(this.tabBarItem('目标', '🎯', 4))
-
-      TabContent() {
-        MemoPage()
-      }
-      .tabBar(this.tabBarItem('备忘', '📝', 5))
+      .tabBar(this.tabBarItem('备忘', '📝', 4))
     }
     .width('100%')
     .height('100%')

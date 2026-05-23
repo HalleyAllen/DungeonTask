@@ -64,7 +64,7 @@ export class DbHelper {
   private async createTables(): Promise<void> {
     const store = this.getRdbStore();
 
-    // 任务表
+    // 任务表（支持层级拆分）
     await store.executeSql(`
       CREATE TABLE IF NOT EXISTS task (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,10 +72,15 @@ export class DbHelper {
         content TEXT,
         date TEXT NOT NULL,
         completed INTEGER DEFAULT 0,
+        parentId INTEGER DEFAULT 0,
+        level INTEGER DEFAULT 0,
+        sortOrder INTEGER DEFAULT 0,
         createTime INTEGER NOT NULL,
         updateTime INTEGER NOT NULL
       )
     `);
+    await store.executeSql('CREATE INDEX IF NOT EXISTS idx_task_date ON task(date)');
+    await store.executeSql('CREATE INDEX IF NOT EXISTS idx_task_parentId ON task(parentId)');
 
     // 健身计划表
     await store.executeSql(`
@@ -124,26 +129,6 @@ export class DbHelper {
         updateTime INTEGER NOT NULL
       )
     `);
-
-    // 目标表（支持树形层级）
-    await store.executeSql(`
-      CREATE TABLE IF NOT EXISTS goal (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        type INTEGER NOT NULL,
-        progress INTEGER DEFAULT 0,
-        completed INTEGER DEFAULT 0,
-        parentId INTEGER DEFAULT 0,
-        level INTEGER DEFAULT 0,
-        sortOrder INTEGER DEFAULT 0,
-        createTime INTEGER NOT NULL,
-        updateTime INTEGER NOT NULL
-      )
-    `);
-
-    // 创建目标表索引
-    await store.executeSql('CREATE INDEX IF NOT EXISTS idx_goal_parentId ON goal(parentId)');
-    await store.executeSql('CREATE INDEX IF NOT EXISTS idx_goal_type ON goal(type)');
 
     // 备忘录表
     await store.executeSql(`

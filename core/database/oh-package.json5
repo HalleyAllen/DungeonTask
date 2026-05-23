@@ -1,5 +1,11 @@
 {
+  "name": "core.database",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
   "dependencies": {
-    "core.model": "1.0.0"
+    "core.database": "file:../database"
   }
 }

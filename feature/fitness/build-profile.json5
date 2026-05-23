@@ -3,5 +3,32 @@
     "name": "feature.fitness",
     "type": "har",
     "version": "1.0.0"
-  }
+  },
+  "apiType": "stageMode",
+  "buildOption": {
+    "copyCodeResource": {
+      "enable": false
+    }
+  },
+  "release": {
+    "obfuscation": {
+      "enable": false,
+      "ruleOptions": {
+        "files": [
+          "./obfuscation-rules.txt"
+        ]
+      },
+      "consumerFiles": [
+        "./consumer-rules.txt"
+      ]
+    }
+  },
+  "targets": [
+    {
+      "name": "default"
+    },
+    {
+      "name": "ohosTest"
+    }
+  ]
 }

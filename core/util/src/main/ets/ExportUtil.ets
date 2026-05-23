@@ -5,7 +5,7 @@ import { filePicker } from '@kit.CoreFileKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { relationalStore } from '@kit.ArkData';
 import { DbHelper } from 'core.database';
-import { Task, FitnessPlan, FitnessCheckin, Sentence, Word, Goal, Memo } from 'core.model';
+import { Task, FitnessPlan, FitnessCheckin, Sentence, Word, Memo } from 'core.model';
 import { DateUtil, Constants } from './Constants';
 
 interface ExportData {
@@ -18,7 +18,6 @@ interface ExportData {
     fitnessCheckins: FitnessCheckin[];
     sentences: Sentence[];
     words: Word[];
-    goals: Goal[];
     memos: Memo[];
   };
 }
@@ -38,7 +37,6 @@ export class ExportUtil {
         fitnessCheckins: await ExportUtil.queryAll<FitnessCheckin>('fitness_checkin'),
         sentences: await ExportUtil.queryAll<Sentence>('sentence'),
         words: await ExportUtil.queryAll<Word>('word'),
-        goals: await ExportUtil.queryAll<Goal>('goal'),
         memos: await ExportUtil.queryAll<Memo>('memo')
       }
     };
@@ -59,7 +57,6 @@ export class ExportUtil {
       fitness: 'fitness_plan',
       sentence: 'sentence',
       word: 'word',
-      goal: 'goal',
       memo: 'memo'
     };
 
@@ -79,7 +76,6 @@ export class ExportUtil {
         fitnessCheckins: moduleName === 'fitness' ? [] : [],
         sentences: moduleName === 'sentence' ? data as Sentence[] : [],
         words: moduleName === 'word' ? data as Word[] : [],
-        goals: moduleName === 'goal' ? data as Goal[] : [],
         memos: moduleName === 'memo' ? data as Memo[] : []
       }
     };

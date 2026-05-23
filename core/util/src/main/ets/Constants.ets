@@ -8,17 +8,8 @@ export class Constants {
   /** 数据库版本 */
   static readonly DB_VERSION: number = 1;
 
-  /** 最大目标层级 */
-  static readonly MAX_GOAL_LEVEL: number = 4;
-
   /** 日期格式 */
   static readonly DATE_FORMAT: string = 'YYYY-MM-DD';
-
-  /** 目标类型 */
-  static readonly GoalType = {
-    SHORT_TERM: 1,  // 短期
-    LONG_TERM: 2    // 长期
-  } as const;
 
   /** 完成状态 */
   static readonly CompleteStatus = {

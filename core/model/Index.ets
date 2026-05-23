@@ -11,7 +11,5 @@ export { FitnessPlan, FitnessCheckin } from './src/main/ets/entity/Fitness';
 export { Sentence } from './src/main/ets/entity/Sentence';
 // 词语实体
 export { Word } from './src/main/ets/entity/Word';
-// 目标实体
-export { Goal } from './src/main/ets/entity/Goal';
 // 备忘录实体
 export { Memo } from './src/main/ets/entity/Memo';
