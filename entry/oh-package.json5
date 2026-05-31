@@ -12,9 +12,8 @@
     "core.base": "file:../core/base",
     "core.ui": "file:../core/ui",
     "feature.task": "file:../feature/task",
-    "feature.fitness": "file:../feature/fitness",
-    "feature.sentence": "file:../feature/sentence",
-    "feature.word": "file:../feature/word",
+    "feature.habit": "file:../feature/habit",
+    "feature.collection": "file:../feature/collection",
     "feature.memo": "file:../feature/memo"
   }
 }

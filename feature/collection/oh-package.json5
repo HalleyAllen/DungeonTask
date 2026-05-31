@@ -1,0 +1,14 @@
+{
+  "name": "feature.collection",
+  "version": "1.0.0",
+  "description": "收藏模块 - 统一管理句子/词语/台词/知识点等碎片收藏",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "core.model": "file:../../core/model",
+    "core.database": "file:../../core/database",
+    "core.util": "file:../../core/util",
+    "core.ui": "file:../../core/ui"
+  }
+}

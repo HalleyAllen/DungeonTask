@@ -2,15 +2,12 @@
  * ViewModel 基类
  * 提供通用状态管理能力
  */
-import { AppStorageV2 } from '@kit.ArkUI';
 
 export abstract class BaseViewModel {
   /** 加载状态 */
-  @StorageV2.State
   isLoading: boolean = false;
 
   /** 错误信息 */
-  @StorageV2.State
   errorMessage: string = '';
 
   /** 显示加载中 */

@@ -37,6 +37,42 @@
           ]
         }
       ]
+    },
+    {
+      "name": "core.base",
+      "srcPath": "./core/base"
+    },
+    {
+      "name": "core.database",
+      "srcPath": "./core/database"
+    },
+    {
+      "name": "core.model",
+      "srcPath": "./core/model"
+    },
+    {
+      "name": "core.ui",
+      "srcPath": "./core/ui"
+    },
+    {
+      "name": "core.util",
+      "srcPath": "./core/util"
+    },
+    {
+      "name": "feature.task",
+      "srcPath": "./feature/task"
+    },
+    {
+      "name": "feature.habit",
+      "srcPath": "./feature/habit"
+    },
+    {
+      "name": "feature.collection",
+      "srcPath": "./feature/collection"
+    },
+    {
+      "name": "feature.memo",
+      "srcPath": "./feature/memo"
     }
   ]
 }

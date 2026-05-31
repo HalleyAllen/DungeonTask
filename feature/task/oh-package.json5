@@ -6,6 +6,9 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "feature.task": "file:../task"
+    "core.util": "file:../../core/util",
+    "core.model": "file:../../core/model",
+    "core.ui": "file:../../core/ui",
+    "core.database": "file:../../core/database"
   }
 }

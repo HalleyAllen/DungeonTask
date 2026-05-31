@@ -1,0 +1,14 @@
+{
+  "name": "feature.habit",
+  "version": "1.0.0",
+  "description": "习惯管理模块（通用抽象：健身/阅读/冥想…）",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "core.model": "file:../../core/model",
+    "core.database": "file:../../core/database",
+    "core.util": "file:../../core/util",
+    "core.ui": "file:../../core/ui"
+  }
+}

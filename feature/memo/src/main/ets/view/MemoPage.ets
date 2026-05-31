@@ -3,63 +3,17 @@
  */
 import { router } from '@kit.ArkUI';
 import { Memo } from 'core.model';
-import { relationalStore } from '@kit.ArkData';
-import { DbHelper } from 'core.database';
 import { DateUtil } from 'core.util';
 import { EmptyState } from 'core.ui';
+import { MemoPageViewModel } from '../viewmodel/MemoPageViewModel';
 
 @Entry
 @Component
-struct MemoPage {
-  @State memos: Memo[] = [];
-  @State searchText: string = '';
+export struct MemoPage {
+  @State vm: MemoPageViewModel = new MemoPageViewModel();
 
   aboutToAppear() {
-    this.loadMemos();
-  }
-
-  async loadMemos() {
-    try {
-      const store = DbHelper.getInstance().getRdbStore();
-      const predicates = new relationalStore.RdbPredicates('memo');
-      predicates.orderByDesc('createTime');
-      
-      const result = await store.query(predicates);
-      this.memos = this.parseMemos(result);
-      
-      // 过滤搜索结果
-      if (this.searchText) {
-        this.memos = this.memos.filter(m => 
-          m.content.toLowerCase().includes(this.searchText.toLowerCase())
-        );
-      }
-    } catch (e) {
-      console.error('Load memos failed:', e);
-    }
-  }
-
-  async deleteMemo(id: number) {
-    try {
-      const store = DbHelper.getInstance().getRdbStore();
-      await store.delete('memo', new relationalStore.RdbPredicates('memo').equalTo('id', id));
-      this.loadMemos();
-    } catch (e) {
-      console.error('Delete memo failed:', e);
-    }
-  }
-
-  private parseMemos(result: relationalStore.ResultSet): Memo[] {
-    const list: Memo[] = [];
-    while (result.goToNextRow()) {
-      const memo = new Memo();
-      memo.id = result.getLong(result.getColumnIndex('id'));
-      memo.content = result.getString(result.getColumnIndex('content'));
-      memo.createTime = result.getLong(result.getColumnIndex('createTime'));
-      memo.updateTime = result.getLong(result.getColumnIndex('updateTime'));
-      list.push(memo);
-    }
-    result.close();
-    return list;
+    this.vm.loadMemos();
   }
 
   build() {
@@ -76,14 +30,14 @@ struct MemoPage {
 
       // 搜索栏
       Row() {
-        TextInput({ placeholder: '搜索备忘录...', text: this.searchText })
+        TextInput({ placeholder: '搜索备忘录...', text: this.vm.searchText })
           .width('100%')
           .height(40)
           .backgroundColor('#F5F5F5')
           .borderRadius(20)
           .onChange((value: string) => {
-            this.searchText = value;
-            this.loadMemos();
+            this.vm.searchText = value;
+            this.vm.loadMemos();
           })
       }
       .width('100%')
@@ -91,12 +45,12 @@ struct MemoPage {
       .backgroundColor('#FFFFFF')
 
       // 列表
-      if (this.memos.length === 0) {
-        EmptyState({ message: this.searchText ? '未找到相关备忘录' : '暂无备忘录，点击下方添加', icon: '📝' })
+      if (this.vm.memos.length === 0) {
+        EmptyState({ message: this.vm.searchText ? '未找到相关备忘录' : '暂无备忘录，点击下方添加', icon: '📝' })
           .layoutWeight(1)
       } else {
         List() {
-          ForEach(this.memos, (memo: Memo) => {
+          ForEach(this.vm.memos, (memo: Memo) => {
             ListItem() {
               Column() {
                 Text(memo.content)
@@ -115,7 +69,7 @@ struct MemoPage {
 
                   Text('🗑️')
                     .fontSize(16)
-                    .onClick(() => this.deleteMemo(memo.id))
+                    .onClick(() => this.vm.deleteMemo(memo.id))
                 }
                 .width('100%')
                 .margin({ top: 8 })

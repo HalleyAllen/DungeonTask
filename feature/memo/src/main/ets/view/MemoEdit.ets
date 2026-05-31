@@ -2,66 +2,17 @@
  * 备忘录编辑页
  */
 import { router } from '@kit.ArkUI';
-import { Memo } from 'core.model';
-import { relationalStore } from '@kit.ArkData';
-import { DbHelper } from 'core.database';
-import { DateUtil } from 'core.util';
+import { EditPageParams } from 'core.model';
+import { MemoEditViewModel } from '../viewmodel/MemoEditViewModel';
 
 @Entry
 @Component
-struct MemoEdit {
-  @State content: string = '';
-  @State isEdit: boolean = false;
-  @State memoId: number = 0;
+export struct MemoEdit {
+  @State vm: MemoEditViewModel = new MemoEditViewModel();
 
   aboutToAppear() {
-    const params = router.getParams() as Record<string, number>;
-    if (params && params.id) {
-      this.isEdit = true;
-      this.memoId = params.id;
-      this.loadMemo();
-    }
-  }
-
-  async loadMemo() {
-    try {
-      const store = DbHelper.getInstance().getRdbStore();
-      const result = await store.query(
-        new relationalStore.RdbPredicates('memo').equalTo('id', this.memoId)
-      );
-      if (result.goToFirstRow()) {
-        this.content = result.getString(result.getColumnIndex('content'));
-      }
-      result.close();
-    } catch (e) {
-      console.error('Load memo failed:', e);
-    }
-  }
-
-  async save() {
-    if (!this.content.trim()) return;
-
-    try {
-      const store = DbHelper.getInstance().getRdbStore();
-      const valueBucket: relationalStore.ValuesBucket = {
-        content: this.content,
-        updateTime: DateUtil.getNow()
-      };
-
-      if (this.isEdit) {
-        await store.update(
-          'memo',
-          valueBucket,
-          new relationalStore.RdbPredicates('memo').equalTo('id', this.memoId)
-        );
-      } else {
-        valueBucket['createTime'] = DateUtil.getNow();
-        await store.insert('memo', valueBucket);
-      }
-      router.back();
-    } catch (e) {
-      console.error('Save memo failed:', e);
-    }
+    const params = router.getParams() as EditPageParams;
+    this.vm.init(params);
   }
 
   build() {
@@ -74,7 +25,7 @@ struct MemoEdit {
 
         Blank()
 
-        Text(this.isEdit ? '编辑备忘录' : '新增备忘录')
+        Text(this.vm.isEdit ? '编辑备忘录' : '新增备忘录')
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
 
@@ -83,19 +34,22 @@ struct MemoEdit {
         Text('保存')
           .fontSize(16)
           .fontColor('#1890FF')
-          .onClick(() => this.save())
+          .onClick(async () => {
+            const ok = await this.vm.save();
+            if (ok) router.back();
+          })
       }
       .width('100%')
       .padding(16)
       .backgroundColor('#FFFFFF')
 
-      TextArea({ placeholder: '记录你的想法...', text: this.content })
+      TextArea({ placeholder: '记录你的想法...', text: this.vm.content })
         .width('100%')
         .layoutWeight(1)
         .padding(16)
         .backgroundColor('#FFFFFF')
         .onChange((value: string) => {
-          this.content = value;
+          this.vm.content = value;
         })
     }
     .width('100%')

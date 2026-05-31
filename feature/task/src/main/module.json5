@@ -1,0 +1,11 @@
+{
+  "module": {
+    "name": "feature.task",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet",
+      "2in1"
+    ]
+  }
+}
