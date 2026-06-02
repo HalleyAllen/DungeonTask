@@ -7,7 +7,7 @@ import { TaskViewModel } from '../viewmodel/TaskViewModel';
 import { EmptyState } from 'core.ui';
 import { DateUtil } from 'core.util';
 
-@Entry
+// @Entry
 @Component
 export struct TaskPage {
   @State viewModel: TaskViewModel = new TaskViewModel();

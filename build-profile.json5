@@ -73,6 +73,10 @@
     {
       "name": "feature.memo",
       "srcPath": "./feature/memo"
+    },
+    {
+      "name": "feature.settings",
+      "srcPath": "./feature/settings"
     }
   ]
 }

@@ -4,7 +4,7 @@
 import { router } from '@kit.ArkUI';
 import { HabitEditViewModel } from '../viewmodel/HabitEditViewModel';
 
-@Entry
+// @Entry
 @Component
 export struct HabitEdit {
   @State vm: HabitEditViewModel = new HabitEditViewModel();

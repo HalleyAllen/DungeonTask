@@ -7,7 +7,7 @@ import { DateUtil } from 'core.util';
 import { EmptyState } from 'core.ui';
 import { MemoPageViewModel } from '../viewmodel/MemoPageViewModel';
 
-@Entry
+// @Entry
 @Component
 export struct MemoPage {
   @State vm: MemoPageViewModel = new MemoPageViewModel();

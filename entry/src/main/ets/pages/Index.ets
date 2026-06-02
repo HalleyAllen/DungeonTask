@@ -1,64 +1,45 @@
 /**
- * 主页面 - 底部 Tab 导航
+ * 应用入口 - HMRouter 导航容器
+ * 参考 keep_accounts 项目架构
  */
-import { router } from '@kit.ArkUI';
-import { TaskPage } from 'feature.task';
-import { HabitPage } from 'feature.habit';
-import { CollectionPage } from 'feature.collection';
-import { MemoPage } from 'feature.memo';
+import { HMNavigation, HMDefaultGlobalAnimator, HMRouterMgr } from '@hadss/hmrouter';
+import { MainPage } from './MainPage';
+import { PageManagePage } from 'feature.settings';
+import { AttributeUpdater } from '@kit.ArkUI';
+
+/**
+ * Navigation 属性配置器
+ * 用于设置 Navigation 组件的显示属性
+ */
+class NavModifier extends AttributeUpdater<NavigationAttribute> {
+  initializeModifier(instance: NavigationAttribute): void {
+    instance.mode(NavigationMode.Stack);
+    instance.navBarWidth('100%');
+    instance.hideTitleBar(true);
+    instance.hideToolBar(true);
+  }
+}
 
 @Entry
 @Component
-export struct Index {
-  @State currentTab: number = 0;
-
-  build() {
-    Tabs({ barPosition: BarPosition.End, controller: this.tabController }) {
-      TabContent() {
-        TaskPage()
-      }
-      .tabBar(this.tabBarItem('任务', '📋', 0))
-
-      TabContent() {
-        HabitPage()
-      }
-      .tabBar(this.tabBarItem('习惯', '🔄', 1))
-
-      TabContent() {
-        CollectionPage()
-      }
-      .tabBar(this.tabBarItem('收藏', '📦', 2))
-
-      TabContent() {
-        MemoPage()
-      }
-      .tabBar(this.tabBarItem('备忘', '📝', 3))
-    }
-    .width('100%')
-    .height('100%')
-    .barHeight(60)
-    .onChange((index: number) => {
-      this.currentTab = index;
-    })
+struct Index {
+  private modifier: NavModifier = new NavModifier();
+  aboutToAppear(): void {
   }
 
-  private tabController: TabsController = new TabsController();
-
-  @Builder
-  tabBarItem(title: string, icon: string, index: number) {
+  build() {
     Column() {
-      Text(icon)
-        .fontSize(24)
-      
-      Text(title)
-        .fontSize(12)
-        .fontColor(this.currentTab === index ? '#1890FF' : '#999999')
-        .margin({ top: 4 })
+      HMNavigation({
+        navigationId: 'mainNavigation',
+        homePageUrl: 'MainPage',
+        options: {
+          standardAnimator: HMDefaultGlobalAnimator.STANDARD_ANIMATOR,
+          dialogAnimator: HMDefaultGlobalAnimator.DIALOG_ANIMATOR,
+          modifier: this.modifier
+        }
+      })
     }
-    .width('100%')
-    .justifyContent(FlexAlign.Center)
-    .alignItems(HorizontalAlign.Center)
-    .height(60)
-    .backgroundColor('#FFFFFF')
+    .width("100%")
+    .height("100%")
   }
 }

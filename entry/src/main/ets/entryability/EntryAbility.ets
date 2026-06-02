@@ -2,6 +2,7 @@ import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.Ab
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { DbHelper } from 'core.database';
+import { HMRouterMgr } from '@hadss/hmrouter';
 
 const DOMAIN = 0x0000;
 
@@ -12,6 +13,11 @@ export default class EntryAbility extends UIAbility {
     } catch (err) {
       hilog.error(DOMAIN, 'EntryAbility', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
+
+    // 初始化 HMRouter
+    HMRouterMgr.init({ context: this.context });
+    hilog.info(DOMAIN, 'EntryAbility', '%{public}s', 'HMRouter initialized');
+
     hilog.info(DOMAIN, 'EntryAbility', '%{public}s', 'Ability onCreate');
   }
 

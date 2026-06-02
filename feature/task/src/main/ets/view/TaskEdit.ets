@@ -5,7 +5,7 @@ import { router } from '@kit.ArkUI';
 import { EditPageParams } from 'core.model';
 import { TaskEditViewModel } from '../viewmodel/TaskEditViewModel';
 
-@Entry
+// @Entry
 @Component
 export struct TaskEdit {
   @State vm: TaskEditViewModel = new TaskEditViewModel();

@@ -14,6 +14,7 @@
     "feature.task": "file:../feature/task",
     "feature.habit": "file:../feature/habit",
     "feature.collection": "file:../feature/collection",
-    "feature.memo": "file:../feature/memo"
+    "feature.memo": "file:../feature/memo",
+    "feature.settings": "file:../feature/settings"
   }
 }

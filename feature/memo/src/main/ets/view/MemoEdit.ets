@@ -5,7 +5,7 @@ import { router } from '@kit.ArkUI';
 import { EditPageParams } from 'core.model';
 import { MemoEditViewModel } from '../viewmodel/MemoEditViewModel';
 
-@Entry
+// @Entry
 @Component
 export struct MemoEdit {
   @State vm: MemoEditViewModel = new MemoEditViewModel();

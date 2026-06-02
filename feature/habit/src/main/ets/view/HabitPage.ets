@@ -7,7 +7,7 @@ import { DateUtil } from 'core.util';
 import { EmptyState } from 'core.ui';
 import { HabitPageViewModel } from '../viewmodel/HabitPageViewModel';
 
-@Entry
+// @Entry
 @Component
 export struct HabitPage {
   @State vm: HabitPageViewModel = new HabitPageViewModel();
