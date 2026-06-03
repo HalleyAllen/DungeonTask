@@ -1,42 +1,50 @@
 /**
  * 页面管理 - 排序与显隐控制
+ * 长按 ☰ 手柄拖动排序
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { SettingsViewModel, PageConfig } from '../viewmodel/SettingsViewModel';
+
+const ITEM_HEIGHT: number = 56;
 
 @HMRouter({ pageUrl: 'PageManagePage' })
 @Component
 export struct PageManagePage {
   private vm: SettingsViewModel = new SettingsViewModel();
   @State pageConfigs: PageConfig[] = [];
+  /** 当前被拖拽项的 key，空串表示无拖拽 */
+  @State dragKey: string = '';
+  /** 拖拽累计 Y 偏移（视觉用） */
+  @State dragOffY: number = 0;
+  /** 拖拽累计位移，用于计算换位阈值 */
+  private accPanY: number = 0;
+  /** 上次 PanGesture 的 offsetY，用于计算增量 */
+  private lastOffY: number = 0;
 
   async aboutToAppear(): Promise<void> {
     await this.vm.loadPageConfig(getContext(this));
-    this.pageConfigs = this.vm.pageConfigs;
+    this.pageConfigs = [...this.vm.pageConfigs];
   }
 
   build() {
     Column() {
-      // 顶部导航栏
       this.titleBar()
 
-      // 说明文字
-      Text('拖拽排序前四个功能页面，关闭的页面将不在导航栏显示')
+      Text('长按 ☰ 拖动排序，关闭的页面将不在导航栏显示')
         .fontSize(13)
         .fontColor('#999999')
         .width('100%')
         .padding({ left: 16, right: 16, top: 12, bottom: 16 })
 
-      // 页面列表
       Scroll() {
         Column() {
           ForEach(this.pageConfigs, (config: PageConfig, index: number) => {
             this.pageRow(config, index)
-          })
-
-          Column().height(24)
+          }, (config: PageConfig): string => config.key)
         }
         .width('100%')
+        .constraintSize({ minHeight: '100%', maxHeight: Infinity })
+        .justifyContent(FlexAlign.Start)
       }
       .layoutWeight(1)
       .backgroundColor('#F5F5F5')
@@ -54,7 +62,6 @@ export struct PageManagePage {
           .fontSize(26)
           .fontColor('#1890FF')
           .margin({ right: 4 })
-
         Text('返回')
           .fontSize(16)
           .fontColor('#1890FF')
@@ -82,43 +89,64 @@ export struct PageManagePage {
   pageRow(config: PageConfig, index: number) {
     Column() {
       Row() {
-        // 拖拽图标示意
-        Text('☰')
-          .fontSize(16)
-          .fontColor('#CCCCCC')
-          .margin({ right: 12 })
-
-        // 排序按钮
-        Column() {
-          Button('▲')
-            .fontSize(12)
-            .width(32)
-            .height(24)
-            .fontColor(index === 0 ? '#CCCCCC' : '#999999')
-            .backgroundColor('#F5F5F5')
-            .borderRadius(4)
-            .enabled(index > 0)
-            .onClick(() => {
-              this.vm.movePageUp(getContext(this), index);
-              this.pageConfigs = this.vm.pageConfigs;
-            })
-
-          Button('▼')
-            .fontSize(12)
-            .width(32)
-            .height(24)
-            .fontColor(index === this.pageConfigs.length - 1 ? '#CCCCCC' : '#999999')
-            .backgroundColor('#F5F5F5')
-            .borderRadius(4)
-            .enabled(index < this.pageConfigs.length - 1)
-            .onClick(() => {
-              this.vm.movePageDown(getContext(this), index);
-              this.pageConfigs = this.vm.pageConfigs;
-            })
+        // 拖拽手柄：长按触发拖拽
+        Row() {
+          Text('☰')
+            .fontSize(18)
+            .fontColor(this.dragKey === config.key ? '#1890FF' : '#CCCCCC')
         }
-        .margin({ right: 12 })
+        .width(36)
+        .height(36)
+        .justifyContent(FlexAlign.Center)
+        .hitTestBehavior(HitTestMode.Block)
+        .gesture(
+          GestureGroup(GestureMode.Sequence,
+            LongPressGesture({ duration: 250, repeat: false })
+              .onAction(() => {
+                this.dragKey = config.key;
+                this.accPanY = 0;
+                this.dragOffY = 0;
+                this.lastOffY = 0;
+              }),
+            PanGesture({ direction: PanDirection.Vertical, distance: 5 })
+              .onActionUpdate((event: GestureEvent) => {
+                if (this.dragKey === '') {
+                  return;
+                }
+                // 计算本次回调的增量（offsetY 是累计值）
+                const delta = event.offsetY - this.lastOffY;
+                this.lastOffY = event.offsetY;
+                this.accPanY += delta;
+                this.dragOffY = this.accPanY;
 
-        // 页面名称 + 图标提示
+                // 超过一行高度就换位
+                const steps = Math.round(this.accPanY / ITEM_HEIGHT);
+                if (steps !== 0) {
+                  this.pageConfigs = this.vm.movePageBySteps(config.key, steps);
+                  this.accPanY -= steps * ITEM_HEIGHT;
+                  this.dragOffY = this.accPanY;
+                }
+              })
+              .onActionEnd(() => {
+                if (this.dragKey !== '') {
+                  this.vm.commitPageOrder(getContext(this));
+                }
+                this.dragKey = '';
+                this.dragOffY = 0;
+                this.accPanY = 0;
+                this.lastOffY = 0;
+              })
+              .onActionCancel(() => {
+                this.dragKey = '';
+                this.dragOffY = 0;
+                this.accPanY = 0;
+                this.lastOffY = 0;
+              })
+          )
+        )
+        .margin({ right: 8 })
+
+        // 页面名称
         Text(config.label)
           .fontSize(16)
           .fontColor(config.visible ? '#333333' : '#CCCCCC')
@@ -128,14 +156,24 @@ export struct PageManagePage {
         Toggle({ type: ToggleType.Switch, isOn: config.visible })
           .onChange((isOn: boolean) => {
             this.vm.togglePageVisible(getContext(this), index);
-            this.pageConfigs = this.vm.pageConfigs;
+            this.pageConfigs = [...this.vm.pageConfigs];
           })
       }
       .width('100%')
-      .height(56)
+      .height(ITEM_HEIGHT)
       .padding({ left: 16, right: 16 })
       .alignItems(VerticalAlign.Center)
-      .backgroundColor('#FFFFFF')
+      .backgroundColor(
+        this.dragKey === config.key ? '#F0F7FF' : '#FFFFFF'
+      )
+      .offset({ y: this.dragKey === config.key ? this.dragOffY : 0 })
+      .zIndex(this.dragKey === config.key ? 10 : 0)
+      .shadow(
+        this.dragKey === config.key
+          ? { radius: 8, color: '#00000020', offsetY: 2 }
+          : { radius: 0 }
+      )
+      .animation({ duration: 100 })
 
       // 分割线
       if (index < this.pageConfigs.length - 1) {
@@ -146,6 +184,6 @@ export struct PageManagePage {
       }
     }
     .width('100%')
-    .padding({ left: 16, right: 16 })
   }
+
 }

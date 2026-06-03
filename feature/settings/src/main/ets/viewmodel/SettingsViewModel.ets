@@ -138,11 +138,11 @@ export class SettingsViewModel {
    */
   movePageUp(context: Context, index: number): void {
     if (index <= 0) return;
-    const arr = this.pageConfigs;
+    const arr = [...this.pageConfigs];
     const tmp = arr[index - 1];
     arr[index - 1] = arr[index];
     arr[index] = tmp;
-    this.pageConfigs = arr; // 触发刷新
+    this.pageConfigs = arr;
     this.savePageConfig(context);
   }
 
@@ -151,7 +151,7 @@ export class SettingsViewModel {
    */
   movePageDown(context: Context, index: number): void {
     if (index >= this.pageConfigs.length - 1) return;
-    const arr = this.pageConfigs;
+    const arr = [...this.pageConfigs];
     const tmp = arr[index];
     arr[index] = arr[index + 1];
     arr[index + 1] = tmp;
@@ -163,9 +163,48 @@ export class SettingsViewModel {
    * 切换页面显隐
    */
   togglePageVisible(context: Context, index: number): void {
-    const arr = this.pageConfigs;
+    const arr = [...this.pageConfigs];
     arr[index].visible = !arr[index].visible;
     this.pageConfigs = arr;
+    this.savePageConfig(context);
+  }
+
+  /**
+   * 按步长移动页面（拖拽排序用）
+   * @param key  被拖拽项的 key
+   * @param steps 正数向下、负数向上，每步换 1 位
+   * @returns 新的 pageConfigs 引用（供 View 层 @State 刷新）
+   */
+  movePageBySteps(key: string, steps: number): PageConfig[] {
+    if (steps === 0) {
+      return this.pageConfigs;
+    }
+    const arr = [...this.pageConfigs];
+    const idx = arr.findIndex((c: PageConfig) => c.key === key);
+    if (idx < 0) {
+      return this.pageConfigs;
+    }
+    const direction = steps > 0 ? 1 : -1;
+    const count = Math.abs(steps);
+    let current = idx;
+    for (let i = 0; i < count; i++) {
+      const target = current + direction;
+      if (target < 0 || target >= arr.length) {
+        break;
+      }
+      const tmp = arr[current];
+      arr[current] = arr[target];
+      arr[target] = tmp;
+      current = target;
+    }
+    this.pageConfigs = arr;
+    return arr;
+  }
+
+  /**
+   * 持久化当前页面排序
+   */
+  commitPageOrder(context: Context): void {
     this.savePageConfig(context);
   }
 
