@@ -3,14 +3,14 @@
  * 长按 ☰ 手柄拖动排序
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
-import { SettingsViewModel, PageConfig } from '../viewmodel/SettingsViewModel';
+import { PageManagePageViewModel, PageConfig } from '../viewmodel/PageManagePageViewModel';
 
 const ITEM_HEIGHT: number = 56;
 
 @HMRouter({ pageUrl: 'PageManagePage' })
 @Component
 export struct PageManagePage {
-  private vm: SettingsViewModel = new SettingsViewModel();
+  private vm: PageManagePageViewModel = new PageManagePageViewModel();
   @State pageConfigs: PageConfig[] = [];
   /** 当前被拖拽项的 key，空串表示无拖拽 */
   @State dragKey: string = '';

@@ -14,7 +14,7 @@ export struct EmptyState {
       
       Text(this.message)
         .fontSize(16)
-        .fontColor('#999999')
+        .fontColor('#A6A6A6')
         .textAlign(TextAlign.Center);
     }
     .width('100%')

@@ -12,11 +12,11 @@ export struct LoadingOverlay {
         LoadingProgress()
           .width(48)
           .height(48)
-          .color('#1890FF');
+          .color('#1677FF');
         
         Text(this.message)
           .fontSize(14)
-          .fontColor('#666666')
+          .fontColor('#A6A6A6')
           .margin({ top: 16 });
       }
       .width('100%')
