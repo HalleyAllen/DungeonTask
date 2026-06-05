@@ -4,9 +4,11 @@
  * 内置类型显示专属扩展字段，自定义类型使用通用描述字段
  */
 import { router } from '@kit.ArkUI';
+import { HMRouter } from '@hadss/hmrouter';
 import { CollectionTypeItem, EditPageParams } from 'core.model';
 import { CollectionEditViewModel } from '../viewmodel/CollectionEditViewModel';
 
+@HMRouter({ pageUrl: 'CollectionEdit' })
 @Component
 export struct CollectionEdit {
   @State vm: CollectionEditViewModel = new CollectionEditViewModel();

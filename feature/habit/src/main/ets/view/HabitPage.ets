@@ -2,12 +2,13 @@
  * 习惯管理列表页（通用抽象：健身房/阅读/冥想… + 结构化打卡）
  */
 import { router } from '@kit.ArkUI';
+import { HMRouter } from '@hadss/hmrouter';
 import { Habit, HabitLog } from 'core.model';
 import { DateUtil } from 'core.util';
-import { EmptyState } from 'core.ui';
+import { EmptyState, FloatingActionButton } from 'core.ui';
 import { HabitPageViewModel } from '../viewmodel/HabitPageViewModel';
 
-// @Entry
+@HMRouter({ pageUrl: 'HabitPage' })
 @Component
 export struct HabitPage {
   @State vm: HabitPageViewModel = new HabitPageViewModel();
@@ -17,98 +18,95 @@ export struct HabitPage {
   }
 
   build() {
-    Column() {
-      // 标题栏
-      Row() {
-        Text('习惯')
-          .fontSize(20)
-          .fontWeight(FontWeight.Bold)
-      }
-      .width('100%')
-      .padding(16)
-      .backgroundColor('#FFFFFF')
-
-      // 今日打卡
+    Stack() {
       Column() {
+        // 标题栏
         Row() {
-          Text('今日打卡')
-            .fontSize(16)
+          Text('习惯')
+            .fontSize(20)
             .fontWeight(FontWeight.Bold)
-          Text(DateUtil.getWeekDayName(DateUtil.getTodayWeekDay()))
-            .fontSize(14)
-            .fontColor('#666666')
-            .margin({ left: 8 })
         }
         .width('100%')
         .padding(16)
         .backgroundColor('#FFFFFF')
 
-        if (this.vm.todayHabits.length === 0) {
-          EmptyState({ message: '今天没有需要打卡的习惯', icon: '🔄' })
-            .height(120)
-        } else {
-          List() {
-            ForEach(this.vm.todayHabits, (habit: Habit) => {
-              ListItem() { this.habitItem(habit, true) }
-            })
+        // 今日打卡
+        Column() {
+          Row() {
+            Text('今日打卡')
+              .fontSize(16)
+              .fontWeight(FontWeight.Bold)
+            Text(DateUtil.getWeekDayName(DateUtil.getTodayWeekDay()))
+              .fontSize(14)
+              .fontColor('#666666')
+              .margin({ left: 8 })
           }
-          .padding({ left: 16, right: 16 })
-        }
-      }
-      .margin({ top: 8 })
-
-      // 全部习惯（按分类分组）
-      Column() {
-        Text('全部习惯')
-          .fontSize(16)
-          .fontWeight(FontWeight.Bold)
           .width('100%')
           .padding(16)
           .backgroundColor('#FFFFFF')
 
-        if (this.vm.habits.length === 0) {
-          EmptyState({ message: '还没有习惯，点击下方添加', icon: '⭐' })
-            .height(200)
-        } else {
-          List() {
-            ForEach(this.vm.categories, (cat: string) => {
-              ListItem() {
-                Column() {
-                  Text(cat)
-                    .fontSize(14)
-                    .fontColor('#999999')
-                    .padding({ left: 16, top: 12, bottom: 4 })
-                    .width('100%')
-                }
-              }
-
-              ForEach(this.vm.habits.filter(h => h.category === cat), (habit: Habit) => {
-                ListItem() { this.habitItem(habit, false) }
+          if (this.vm.todayHabits.length === 0) {
+            EmptyState({ message: '今天没有需要打卡的习惯', icon: '🔄' })
+              .height(120)
+          } else {
+            List() {
+              ForEach(this.vm.todayHabits, (habit: Habit) => {
+                ListItem() { this.habitItem(habit, true) }
               })
-            })
+            }
+            .padding({ left: 16, right: 16 })
           }
-          .padding({ left: 16, right: 16 })
         }
-      }
-      .layoutWeight(1)
-      .margin({ top: 8 })
+        .margin({ top: 8 })
 
-      // 悬浮按钮
-      Button('＋')
-        .width(56)
-        .height(56)
-        .fontSize(28)
-        .fontColor('#FFFFFF')
-        .backgroundColor('#1890FF')
-        .borderRadius(28)
-        .position({ x: '85%', y: '80%' })
-        .onClick(() => {
+        // 全部习惯（按分类分组）
+        Column() {
+          Text('全部习惯')
+            .fontSize(16)
+            .fontWeight(FontWeight.Bold)
+            .width('100%')
+            .padding(16)
+            .backgroundColor('#FFFFFF')
+
+          if (this.vm.habits.length === 0) {
+            EmptyState({ message: '还没有习惯，点击下方添加', icon: '⭐' })
+              .height(200)
+          } else {
+            List() {
+              ForEach(this.vm.categories, (cat: string) => {
+                ListItem() {
+                  Column() {
+                    Text(cat)
+                      .fontSize(14)
+                      .fontColor('#999999')
+                      .padding({ left: 16, top: 12, bottom: 4 })
+                      .width('100%')
+                  }
+                }
+
+                ForEach(this.vm.habits.filter(h => h.category === cat), (habit: Habit) => {
+                  ListItem() { this.habitItem(habit, false) }
+                })
+              })
+            }
+            .padding({ left: 16, right: 16 })
+          }
+        }
+        .layoutWeight(1)
+        .margin({ top: 8 })
+      }
+      .width('100%')
+      .height('100%')
+      .backgroundColor('#F5F5F5')
+
+      FloatingActionButton({
+        clickFun: () => {
           router.pushUrl({ url: 'pages/habit/HabitEdit' });
-        })
+        }
+      })
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
   }
 
   @Builder

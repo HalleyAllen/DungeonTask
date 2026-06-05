@@ -4,10 +4,10 @@
  */
 import { promptAction } from '@kit.ArkUI';
 import { pasteboard } from '@kit.BasicServicesKit';
-import { HMRouterMgr } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { SettingsViewModel, SettingsSection, SettingsItem } from '../viewmodel/SettingsViewModel';
 
-// @Entry
+@HMRouter({ pageUrl: 'SettingsPage' })
 @Component
 export struct SettingsPage {
   @State vm: SettingsViewModel = new SettingsViewModel();

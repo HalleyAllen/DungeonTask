@@ -2,10 +2,11 @@
  * 备忘录编辑页
  */
 import { router } from '@kit.ArkUI';
+import { HMRouter } from '@hadss/hmrouter';
 import { EditPageParams } from 'core.model';
 import { MemoEditViewModel } from '../viewmodel/MemoEditViewModel';
 
-// @Entry
+@HMRouter({ pageUrl: 'MemoEdit' })
 @Component
 export struct MemoEdit {
   @State vm: MemoEditViewModel = new MemoEditViewModel();

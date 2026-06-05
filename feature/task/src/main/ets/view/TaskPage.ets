@@ -2,12 +2,13 @@
  * 任务列表页
  */
 import { router } from '@kit.ArkUI';
+import { HMRouter } from '@hadss/hmrouter';
 import { Task } from 'core.model';
 import { TaskViewModel } from '../viewmodel/TaskViewModel';
-import { EmptyState } from 'core.ui';
+import { EmptyState, FloatingActionButton } from 'core.ui';
 import { DateUtil } from 'core.util';
 
-// @Entry
+@HMRouter({ pageUrl: 'TaskPage' })
 @Component
 export struct TaskPage {
   @State viewModel: TaskViewModel = new TaskViewModel();
@@ -23,15 +24,24 @@ export struct TaskPage {
   }
 
   build() {
-    Column() {
-      this.titleBar()
-      this.filterBar()
-      this.taskList()
-      this.fab()
+    Stack() {
+      Column() {
+        this.titleBar()
+        this.filterBar()
+        this.taskList()
+      }
+      .width('100%')
+      .height('100%')
+      .backgroundColor('#F5F5F5')
+
+      FloatingActionButton({
+        clickFun: () => {
+          router.pushUrl({ url: 'pages/task/TaskEdit' });
+        }
+      })
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
   }
 
   @Builder
@@ -248,26 +258,5 @@ export struct TaskPage {
         });
       }
     })
-  }
-
-  @Builder
-  fab() {
-    Button('＋')
-      .width(56)
-      .height(56)
-      .fontSize(28)
-      .fontColor('#FFFFFF')
-      .backgroundColor('#1890FF')
-      .borderRadius(28)
-      .shadow({
-        radius: 8,
-        color: 'rgba(24, 144, 255, 0.3)',
-        offsetX: 0,
-        offsetY: 4
-      })
-      .position({ x: '85%', y: '80%' })
-      .onClick(() => {
-        router.pushUrl({ url: 'pages/task/TaskEdit' });
-      })
   }
 }

@@ -2,9 +2,10 @@
  * 习惯编辑页（通用抽象：支持组数/次数/时长等结构化目标）
  */
 import { router } from '@kit.ArkUI';
+import { HMRouter } from '@hadss/hmrouter';
 import { HabitEditViewModel } from '../viewmodel/HabitEditViewModel';
 
-// @Entry
+@HMRouter({ pageUrl: 'HabitEdit' })
 @Component
 export struct HabitEdit {
   @State vm: HabitEditViewModel = new HabitEditViewModel();

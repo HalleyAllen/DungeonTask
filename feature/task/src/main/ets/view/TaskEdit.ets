@@ -2,10 +2,11 @@
  * 任务编辑页
  */
 import { router } from '@kit.ArkUI';
+import { HMRouter } from '@hadss/hmrouter';
 import { EditPageParams } from 'core.model';
 import { TaskEditViewModel } from '../viewmodel/TaskEditViewModel';
 
-// @Entry
+@HMRouter({ pageUrl: 'TaskEdit' })
 @Component
 export struct TaskEdit {
   @State vm: TaskEditViewModel = new TaskEditViewModel();
