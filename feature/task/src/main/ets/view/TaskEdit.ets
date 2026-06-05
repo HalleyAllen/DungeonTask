@@ -1,8 +1,7 @@
 /**
  * 任务编辑页
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { EditPageParams } from 'core.model';
 import { TaskEditViewModel } from '../viewmodel/TaskEditViewModel';
 
@@ -12,7 +11,7 @@ export struct TaskEdit {
   @State vm: TaskEditViewModel = new TaskEditViewModel();
 
   aboutToAppear() {
-    const params = router.getParams() as EditPageParams;
+    const params = HMRouterMgr.getCurrentParam() as EditPageParams;
     this.vm.init(params);
   }
 
@@ -22,8 +21,8 @@ export struct TaskEdit {
       Row() {
         Text('取消')
           .fontSize(16)
-          .fontColor('#1890FF')
-          .onClick(() => router.back())
+          .fontColor('#1677FF')
+          .onClick(() => HMRouterMgr.pop())
 
         Blank()
 
@@ -35,10 +34,10 @@ export struct TaskEdit {
 
         Text('保存')
           .fontSize(16)
-          .fontColor('#1890FF')
+          .fontColor('#1677FF')
           .onClick(async () => {
             const ok = await this.vm.save();
-            if (ok) router.back();
+            if (ok) HMRouterMgr.pop();
           })
       }
       .width('100%')
@@ -49,7 +48,7 @@ export struct TaskEdit {
       Column() {
         Text('标题')
           .fontSize(14)
-          .fontColor('#666666')
+          .fontColor('#A6A6A6')
           .width('100%')
           .margin({ bottom: 8 })
 
@@ -64,7 +63,7 @@ export struct TaskEdit {
 
         Text('日期')
           .fontSize(14)
-          .fontColor('#666666')
+          .fontColor('#A6A6A6')
           .width('100%')
           .margin({ top: 24, bottom: 8 })
 
@@ -79,7 +78,7 @@ export struct TaskEdit {
 
         Text('内容')
           .fontSize(14)
-          .fontColor('#666666')
+          .fontColor('#A6A6A6')
           .width('100%')
           .margin({ top: 24, bottom: 8 })
 

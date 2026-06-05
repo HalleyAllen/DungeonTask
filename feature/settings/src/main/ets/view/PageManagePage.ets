@@ -32,7 +32,7 @@ export struct PageManagePage {
 
       Text('长按 ☰ 拖动排序，关闭的页面将不在导航栏显示')
         .fontSize(13)
-        .fontColor('#999999')
+        .fontColor('#A6A6A6')
         .width('100%')
         .padding({ left: 16, right: 16, top: 12, bottom: 16 })
 
@@ -60,11 +60,11 @@ export struct PageManagePage {
       Row() {
         Text('‹')
           .fontSize(26)
-          .fontColor('#1890FF')
+          .fontColor('#1677FF')
           .margin({ right: 4 })
         Text('返回')
           .fontSize(16)
-          .fontColor('#1890FF')
+          .fontColor('#1677FF')
       }
       .onClick(() => HMRouterMgr.pop())
 
@@ -73,7 +73,7 @@ export struct PageManagePage {
       Text('页面管理')
         .fontSize(18)
         .fontWeight(FontWeight.Bold)
-        .fontColor('#333333')
+        .fontColor('#1F1F1F')
 
       Blank()
 
@@ -93,7 +93,7 @@ export struct PageManagePage {
         Row() {
           Text('☰')
             .fontSize(18)
-            .fontColor(this.dragKey === config.key ? '#1890FF' : '#CCCCCC')
+            .fontColor(this.dragKey === config.key ? '#1677FF' : '#D9D9D9')
         }
         .width(36)
         .height(36)
@@ -149,7 +149,7 @@ export struct PageManagePage {
         // 页面名称
         Text(config.label)
           .fontSize(16)
-          .fontColor(config.visible ? '#333333' : '#CCCCCC')
+          .fontColor(config.visible ? '#1F1F1F' : '#D9D9D9')
           .layoutWeight(1)
 
         // 显示开关
@@ -164,7 +164,7 @@ export struct PageManagePage {
       .padding({ left: 16, right: 16 })
       .alignItems(VerticalAlign.Center)
       .backgroundColor(
-        this.dragKey === config.key ? '#F0F7FF' : '#FFFFFF'
+        this.dragKey === config.key ? '#E6F4FF' : '#FFFFFF'
       )
       .offset({ y: this.dragKey === config.key ? this.dragOffY : 0 })
       .zIndex(this.dragKey === config.key ? 10 : 0)

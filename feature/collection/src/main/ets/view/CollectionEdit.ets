@@ -3,8 +3,7 @@
  * 内置类型 + 用户自定义类型
  * 内置类型显示专属扩展字段，自定义类型使用通用描述字段
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { CollectionTypeItem, EditPageParams } from 'core.model';
 import { CollectionEditViewModel } from '../viewmodel/CollectionEditViewModel';
 
@@ -14,7 +13,7 @@ export struct CollectionEdit {
   @State vm: CollectionEditViewModel = new CollectionEditViewModel();
 
   aboutToAppear() {
-    const params = router.getParams() as EditPageParams;
+    const params = HMRouterMgr.getCurrentParam() as EditPageParams;
     this.vm.init(params);
   }
 
@@ -25,8 +24,8 @@ export struct CollectionEdit {
         Row() {
           Text('取消')
             .fontSize(16)
-            .fontColor('#1890FF')
-            .onClick(() => router.back())
+            .fontColor('#1677FF')
+            .onClick(() => HMRouterMgr.pop())
 
           Blank()
 
@@ -38,11 +37,11 @@ export struct CollectionEdit {
 
           Text('保存')
             .fontSize(16)
-            .fontColor('#1890FF')
+            .fontColor('#1677FF')
             .onClick(async () => {
               const ok = await this.vm.save();
               if (ok) {
-                router.back();
+                HMRouterMgr.pop();
               }
             })
         }
@@ -55,7 +54,7 @@ export struct CollectionEdit {
             // 类型选择
             Text('类型')
               .fontSize(14)
-              .fontColor('#666666')
+              .fontColor('#A6A6A6')
               .width('100%')
               .margin({ bottom: 8 })
 
@@ -63,8 +62,8 @@ export struct CollectionEdit {
               ForEach(this.vm.types, (t: CollectionTypeItem) => {
                 Text(t.label)
                   .fontSize(14)
-                  .fontColor(this.vm.itemType === t.value ? '#FFFFFF' : '#333333')
-                  .backgroundColor(this.vm.itemType === t.value ? '#1890FF' : '#F5F5F5')
+                  .fontColor(this.vm.itemType === t.value ? '#FFFFFF' : '#1F1F1F')
+                  .backgroundColor(this.vm.itemType === t.value ? '#1677FF' : '#F5F5F5')
                   .borderRadius(8)
                   .padding({ left: 14, right: 14, top: 8, bottom: 8 })
                   .margin({ right: 8 })
@@ -75,7 +74,7 @@ export struct CollectionEdit {
             // 新建类型按钮
             Text('＋ 新建类型')
               .fontSize(14)
-              .fontColor('#1890FF')
+              .fontColor('#1677FF')
               .fontWeight(FontWeight.Medium)
               .margin({ top: 12 })
               .onClick(() => {
@@ -87,7 +86,7 @@ export struct CollectionEdit {
             // 标题（必填）
             Text('标题 *')
               .fontSize(14)
-              .fontColor('#666666')
+              .fontColor('#A6A6A6')
               .width('100%')
               .margin({ bottom: 8 })
 
@@ -103,7 +102,7 @@ export struct CollectionEdit {
             // 内容
             Text('内容')
               .fontSize(14)
-              .fontColor('#666666')
+              .fontColor('#A6A6A6')
               .width('100%')
               .margin({ top: 24, bottom: 8 })
 
@@ -133,7 +132,7 @@ export struct CollectionEdit {
             // 标签
             Text('标签')
               .fontSize(14)
-              .fontColor('#666666')
+              .fontColor('#A6A6A6')
               .width('100%')
               .margin({ bottom: 8 })
 
@@ -173,7 +172,7 @@ export struct CollectionEdit {
 
         Text('类型名称')
           .fontSize(14)
-          .fontColor('#666666')
+          .fontColor('#A6A6A6')
           .width('100%')
           .margin({ bottom: 8 })
         TextInput({ placeholder: '如：歌词、配方、代码片段', text: this.vm.newTypeLabel })
@@ -186,7 +185,7 @@ export struct CollectionEdit {
         Row() {
           Button('取消')
             .fontSize(16)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .backgroundColor('#F5F5F5')
             .layoutWeight(1)
             .onClick(() => {
@@ -197,7 +196,7 @@ export struct CollectionEdit {
           Button('创建')
             .fontSize(16)
             .fontColor('#FFFFFF')
-            .backgroundColor('#1890FF')
+            .backgroundColor('#1677FF')
             .layoutWeight(1)
             .margin({ left: 12 })
             .enabled(this.vm.newTypeLabel.trim().length > 0)
@@ -231,7 +230,7 @@ export struct CollectionEdit {
     Column() {
       Text('拼音')
         .fontSize(14)
-        .fontColor('#666666')
+        .fontColor('#A6A6A6')
         .width('100%')
         .margin({ bottom: 8 })
       TextInput({ placeholder: '请输入拼音', text: this.vm.wordPinyin })
@@ -243,7 +242,7 @@ export struct CollectionEdit {
 
       Text('释义')
         .fontSize(14)
-        .fontColor('#666666')
+        .fontColor('#A6A6A6')
         .width('100%')
         .margin({ top: 24, bottom: 8 })
       TextArea({ placeholder: '请输入释义', text: this.vm.wordExplanation })
@@ -260,7 +259,7 @@ export struct CollectionEdit {
     Column() {
       Text('出处/来源')
         .fontSize(14)
-        .fontColor('#666666')
+        .fontColor('#A6A6A6')
         .width('100%')
         .margin({ bottom: 8 })
       TextInput({ placeholder: '如：《百年孤独》、某某电影', text: this.vm.textSource })
@@ -272,7 +271,7 @@ export struct CollectionEdit {
 
       Text('作者/角色')
         .fontSize(14)
-        .fontColor('#666666')
+        .fontColor('#A6A6A6')
         .width('100%')
         .margin({ top: 24, bottom: 8 })
       TextInput({ placeholder: '如：马尔克斯、张三', text: this.vm.textAuthor })
@@ -290,7 +289,7 @@ export struct CollectionEdit {
     Column() {
       Text('描述')
         .fontSize(14)
-        .fontColor('#666666')
+        .fontColor('#A6A6A6')
         .width('100%')
         .margin({ bottom: 8 })
       TextArea({ placeholder: '输入描述信息', text: this.vm.customDesc })

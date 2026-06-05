@@ -1,8 +1,7 @@
 /**
  * 备忘录编辑页
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { EditPageParams } from 'core.model';
 import { MemoEditViewModel } from '../viewmodel/MemoEditViewModel';
 
@@ -12,7 +11,7 @@ export struct MemoEdit {
   @State vm: MemoEditViewModel = new MemoEditViewModel();
 
   aboutToAppear() {
-    const params = router.getParams() as EditPageParams;
+    const params = HMRouterMgr.getCurrentParam() as EditPageParams;
     this.vm.init(params);
   }
 
@@ -21,8 +20,8 @@ export struct MemoEdit {
       Row() {
         Text('取消')
           .fontSize(16)
-          .fontColor('#1890FF')
-          .onClick(() => router.back())
+          .fontColor('#1677FF')
+          .onClick(() => HMRouterMgr.pop())
 
         Blank()
 
@@ -34,10 +33,10 @@ export struct MemoEdit {
 
         Text('保存')
           .fontSize(16)
-          .fontColor('#1890FF')
+          .fontColor('#1677FF')
           .onClick(async () => {
             const ok = await this.vm.save();
-            if (ok) router.back();
+            if (ok) HMRouterMgr.pop();
           })
       }
       .width('100%')

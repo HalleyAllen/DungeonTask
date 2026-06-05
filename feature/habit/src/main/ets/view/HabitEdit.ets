@@ -1,8 +1,7 @@
 /**
  * 习惯编辑页（通用抽象：支持组数/次数/时长等结构化目标）
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { HabitEditViewModel } from '../viewmodel/HabitEditViewModel';
 
 @HMRouter({ pageUrl: 'HabitEdit' })
@@ -16,8 +15,8 @@ export struct HabitEdit {
       Row() {
         Text('取消')
           .fontSize(16)
-          .fontColor('#1890FF')
-          .onClick(() => router.back())
+          .fontColor('#1677FF')
+          .onClick(() => HMRouterMgr.pop())
 
         Blank()
 
@@ -29,10 +28,10 @@ export struct HabitEdit {
 
         Text('保存')
           .fontSize(16)
-          .fontColor('#1890FF')
+          .fontColor('#1677FF')
           .onClick(async () => {
             const ok = await this.vm.save();
-            if (ok) router.back();
+            if (ok) HMRouterMgr.pop();
           })
       }
       .width('100%')
@@ -44,7 +43,7 @@ export struct HabitEdit {
           // 图标
           Text('图标')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ bottom: 8 })
 
@@ -64,7 +63,7 @@ export struct HabitEdit {
           // 习惯名称
           Text('习惯名称')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ top: 24, bottom: 8 })
 
@@ -78,7 +77,7 @@ export struct HabitEdit {
           // 分类
           Text('分类')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ top: 24, bottom: 8 })
 
@@ -87,8 +86,8 @@ export struct HabitEdit {
               Text(cat)
                 .fontSize(14)
                 .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-                .backgroundColor(this.vm.category === cat ? this.vm.getCategoryColor(cat) : '#E8E8E8')
-                .fontColor(this.vm.category === cat ? '#FFFFFF' : '#333333')
+                .backgroundColor(this.vm.category === cat ? this.vm.getCategoryColor(cat) : '#F5F5F5')
+                .fontColor(this.vm.category === cat ? '#FFFFFF' : '#1F1F1F')
                 .borderRadius(16)
                 .margin({ right: 8 })
                 .onClick(() => { this.vm.category = cat; })
@@ -99,23 +98,23 @@ export struct HabitEdit {
           // 频率
           Text('频率')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ top: 24, bottom: 8 })
 
           Row() {
             Button('每天')
               .fontSize(14)
-              .fontColor(this.vm.frequency === 1 ? '#FFFFFF' : '#333333')
-              .backgroundColor(this.vm.frequency === 1 ? '#1890FF' : '#E8E8E8')
+              .fontColor(this.vm.frequency === 1 ? '#FFFFFF' : '#1F1F1F')
+              .backgroundColor(this.vm.frequency === 1 ? '#1677FF' : '#F5F5F5')
               .borderRadius(8)
               .padding({ left: 20, right: 20, top: 10, bottom: 10 })
               .onClick(() => { this.vm.frequency = 1; })
 
             Button('每周指定日')
               .fontSize(14)
-              .fontColor(this.vm.frequency === 2 ? '#FFFFFF' : '#333333')
-              .backgroundColor(this.vm.frequency === 2 ? '#1890FF' : '#E8E8E8')
+              .fontColor(this.vm.frequency === 2 ? '#FFFFFF' : '#1F1F1F')
+              .backgroundColor(this.vm.frequency === 2 ? '#1677FF' : '#F5F5F5')
               .borderRadius(8)
               .padding({ left: 20, right: 20, top: 10, bottom: 10 })
               .margin({ left: 8 })
@@ -130,8 +129,8 @@ export struct HabitEdit {
                 Text(day)
                   .fontSize(14)
                   .padding({ left: 12, right: 12, top: 8, bottom: 8 })
-                  .backgroundColor(this.vm.weekDays[index] ? '#1890FF' : '#E8E8E8')
-                  .fontColor(this.vm.weekDays[index] ? '#FFFFFF' : '#333333')
+                  .backgroundColor(this.vm.weekDays[index] ? '#1677FF' : '#F5F5F5')
+                  .fontColor(this.vm.weekDays[index] ? '#FFFFFF' : '#1F1F1F')
                   .borderRadius(16)
                   .margin({ left: index === 0 ? 0 : 4 })
                   .onClick(() => {
@@ -148,20 +147,20 @@ export struct HabitEdit {
           // 量化的目标设定
           Text('目标量化（可选）')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ bottom: 4 })
 
           Text(this.vm.targetSummary)
             .fontSize(12)
-            .fontColor('#999999')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ bottom: 16 })
 
           // 组数 + 次数（运动类）
           Text('组数 × 次数（如俯卧撑、深蹲）')
             .fontSize(13)
-            .fontColor('#999999')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ bottom: 8 })
 
@@ -169,7 +168,7 @@ export struct HabitEdit {
             Column() {
               Text('组数')
                 .fontSize(12)
-                .fontColor('#999999')
+                .fontColor('#A6A6A6')
               Row() {
                 Button('-')
                   .fontSize(18)
@@ -192,15 +191,15 @@ export struct HabitEdit {
             }
             .alignItems(HorizontalAlign.Center)
 
-            Text('×')
+              Text('×')
               .fontSize(18)
-              .fontColor('#999999')
+              .fontColor('#A6A6A6')
               .margin({ left: 12, right: 12 })
 
             Column() {
               Text('次数')
                 .fontSize(12)
-                .fontColor('#999999')
+                .fontColor('#A6A6A6')
               Row() {
                 Button('-')
                   .fontSize(18)
@@ -229,7 +228,7 @@ export struct HabitEdit {
           // 时长（阅读/冥想类）
           Text('时长（分钟）')
             .fontSize(13)
-            .fontColor('#999999')
+            .fontColor('#A6A6A6')
             .width('100%')
             .margin({ bottom: 8 })
 

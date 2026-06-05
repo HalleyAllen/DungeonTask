@@ -87,12 +87,12 @@ export struct SettingsPage {
       Text('DungeonTask')
         .fontSize(20)
         .fontWeight(FontWeight.Bold)
-        .fontColor('#333333')
+        .fontColor('#1F1F1F')
         .margin({ bottom: 6 })
 
       Text('日常记录与自我管理')
         .fontSize(14)
-        .fontColor('#999999')
+        .fontColor('#A6A6A6')
     }
     .width('100%')
     .padding({ top: 32, bottom: 32 })
@@ -108,7 +108,7 @@ export struct SettingsPage {
       // Section 标题
       Text(section.title)
         .fontSize(13)
-        .fontColor('#999999')
+        .fontColor('#A6A6A6')
         .width('100%')
         .padding({ left: 4, top: 24, bottom: 10 })
 
@@ -133,13 +133,13 @@ export struct SettingsPage {
         Text(item.label)
           .fontSize(16)
           .fontColor(item.type === 'danger' ? '#FF4D4F' :
-            item.type === 'info' ? '#999999' : '#333333')
+            item.type === 'info' ? '#A6A6A6' : '#1F1F1F')
           .layoutWeight(1)
 
         if (item.type === 'nav') {
           Text('›')
             .fontSize(20)
-            .fontColor('#CCCCCC')
+            .fontColor('#D9D9D9')
         }
 
         if (item.type === 'action' && item.actionId === 'export') {
@@ -150,20 +150,20 @@ export struct SettingsPage {
           } else {
             Text('导出')
               .fontSize(13)
-              .fontColor('#1890FF')
+              .fontColor('#1677FF')
           }
         }
 
         if (item.type === 'action' && item.actionId === 'sync_generate') {
           Text(this.vm.syncCode ? '已生成' : '生成')
             .fontSize(13)
-            .fontColor(this.vm.syncCode ? '#52C41A' : '#1890FF')
+            .fontColor(this.vm.syncCode ? '#52C41A' : '#1677FF')
         }
 
         if (item.type === 'action' && item.actionId === 'sync_import') {
           Text('导入')
             .fontSize(13)
-            .fontColor('#1890FF')
+            .fontColor('#1677FF')
         }
       }
       .width('100%')
@@ -217,12 +217,12 @@ export struct SettingsPage {
         Text('同步码')
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
-          .fontColor('#333333')
+          .fontColor('#1F1F1F')
           .margin({ bottom: 6 })
 
         Text('复制下方同步码发送给对方，对方即可导入你的数据')
           .fontSize(13)
-          .fontColor('#999999')
+          .fontColor('#A6A6A6')
           .textAlign(TextAlign.Center)
           .margin({ bottom: 20 })
 
@@ -231,14 +231,14 @@ export struct SettingsPage {
           Text(this.vm.syncCode)
             .fontSize(16)
             .fontWeight(FontWeight.Medium)
-            .fontColor('#1890FF')
+            .fontColor('#1677FF')
             .fontFamily('monospace')
             .layoutWeight(1)
             .textAlign(TextAlign.Center)
         }
         .width('100%')
         .height(48)
-        .backgroundColor('#F0F7FF')
+        .backgroundColor('#E6F4FF')
         .borderRadius(8)
         .margin({ bottom: 24 })
 
@@ -246,7 +246,7 @@ export struct SettingsPage {
         Row() {
           Button('复制同步码')
             .fontSize(14)
-            .backgroundColor('#1890FF')
+            .backgroundColor('#1677FF')
             .borderRadius(8)
             .layoutWeight(1)
             .onClick(() => {
@@ -260,7 +260,7 @@ export struct SettingsPage {
 
           Button('关闭')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .backgroundColor('#F5F5F5')
             .borderRadius(8)
             .layoutWeight(1)
@@ -296,19 +296,19 @@ export struct SettingsPage {
           Text('确认清除')
             .fontSize(18)
             .fontWeight(FontWeight.Bold)
-            .fontColor('#333333')
+            .fontColor('#1F1F1F')
         }
         .margin({ bottom: 8 })
 
         Text('此操作将清除所有本地数据，不可恢复')
           .fontSize(14)
-          .fontColor('#666666')
+          .fontColor('#A6A6A6')
           .textAlign(TextAlign.Center)
           .margin({ bottom: 20 })
 
         Text('请在下方输入「确认清除」以继续')
           .fontSize(13)
-          .fontColor('#999999')
+          .fontColor('#A6A6A6')
           .margin({ bottom: 12 })
 
         // 确认输入框
@@ -328,7 +328,7 @@ export struct SettingsPage {
         Row() {
           Button('取消')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .backgroundColor('#F5F5F5')
             .borderRadius(8)
             .layoutWeight(1)
@@ -340,7 +340,7 @@ export struct SettingsPage {
 
           Button('确认清除')
             .fontSize(14)
-            .backgroundColor(this.clearConfirmText === '确认清除' ? '#FF4D4F' : '#CCCCCC')
+            .backgroundColor(this.clearConfirmText === '确认清除' ? '#FF4D4F' : '#D9D9D9')
             .borderRadius(8)
             .layoutWeight(1)
             .enabled(this.clearConfirmText === '确认清除')
@@ -376,12 +376,12 @@ export struct SettingsPage {
         Text('输入同步码')
           .fontSize(18)
           .fontWeight(FontWeight.Bold)
-          .fontColor('#333333')
+          .fontColor('#1F1F1F')
           .margin({ bottom: 6 })
 
         Text('输入对方的同步码，即可导入对方的数据')
           .fontSize(13)
-          .fontColor('#999999')
+          .fontColor('#A6A6A6')
           .textAlign(TextAlign.Center)
           .margin({ bottom: 20 })
 
@@ -402,7 +402,7 @@ export struct SettingsPage {
         Row() {
           Button('取消')
             .fontSize(14)
-            .fontColor('#666666')
+            .fontColor('#A6A6A6')
             .backgroundColor('#F5F5F5')
             .borderRadius(8)
             .layoutWeight(1)
@@ -414,7 +414,7 @@ export struct SettingsPage {
 
           Button('确认导入')
             .fontSize(14)
-            .backgroundColor('#1890FF')
+            .backgroundColor('#1677FF')
             .borderRadius(8)
             .layoutWeight(1)
             .onClick(async () => {

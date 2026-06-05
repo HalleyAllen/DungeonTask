@@ -2,8 +2,7 @@
  * 收藏列表页（统一抽象）
  * 支持按类型筛选：内置类型 + 用户自定义类型
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Collection } from 'core.model';
 import { DateUtil } from 'core.util';
 import { EmptyState, FloatingActionButton } from 'core.ui';
@@ -38,8 +37,8 @@ export struct CollectionPage {
             ForEach(this.vm.typeOptions, (option: TypeOption) => {
               Text(option.label)
                 .fontSize(13)
-                .fontColor(this.vm.selectedType === option.value ? '#FFFFFF' : '#333333')
-                .backgroundColor(this.vm.selectedType === option.value ? '#1890FF' : '#F5F5F5')
+                .fontColor(this.vm.selectedType === option.value ? '#FFFFFF' : '#1F1F1F')
+                .backgroundColor(this.vm.selectedType === option.value ? '#1677FF' : '#F5F5F5')
                 .borderRadius(14)
                 .padding({ left: 12, right: 12, top: 6, bottom: 6 })
                 .margin({ right: 8 })
@@ -70,7 +69,7 @@ export struct CollectionPage {
                     Text(item.title)
                       .fontSize(16)
                       .fontWeight(FontWeight.Bold)
-                      .fontColor('#333333')
+                      .fontColor('#1F1F1F')
                       .layoutWeight(1)
                       .maxLines(1)
                       .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -78,8 +77,8 @@ export struct CollectionPage {
                     // 类型标签
                     Text(this.vm.getTypeLabel(item.type))
                       .fontSize(11)
-                      .fontColor('#1890FF')
-                      .backgroundColor('#E6F7FF')
+                      .fontColor('#1677FF')
+                      .backgroundColor('#E6F4FF')
                       .borderRadius(4)
                       .padding({ left: 6, right: 6, top: 2, bottom: 2 })
                   }
@@ -89,7 +88,7 @@ export struct CollectionPage {
                   if (item.content) {
                     Text(item.content)
                       .fontSize(14)
-                      .fontColor('#666666')
+                      .fontColor('#A6A6A6')
                       .width('100%')
                       .maxLines(2)
                       .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -100,8 +99,8 @@ export struct CollectionPage {
                   if (item.tag) {
                     Text(item.tag)
                       .fontSize(11)
-                      .fontColor('#1890FF')
-                      .backgroundColor('#E6F7FF')
+                      .fontColor('#1677FF')
+                      .backgroundColor('#E6F4FF')
                       .borderRadius(4)
                       .padding({ left: 8, right: 8, top: 2, bottom: 2 })
                       .margin({ top: 8 })
@@ -116,7 +115,7 @@ export struct CollectionPage {
                     if (this.vm.getExtraText(item.extra, item.type)) {
                       Text(this.vm.getExtraText(item.extra, item.type)!)
                         .fontSize(13)
-                        .fontColor('#999999')
+                        .fontColor('#A6A6A6')
                         .width('100%')
                     }
 
@@ -136,7 +135,7 @@ export struct CollectionPage {
                     Blank()
                     Text(this.vm.expandedId === item.id ? '▲ 收起' : '▼ 展开')
                       .fontSize(12)
-                      .fontColor('#999999')
+                      .fontColor('#A6A6A6')
                   }
                   .width('100%')
                   .margin({ top: 8 })
@@ -163,7 +162,9 @@ export struct CollectionPage {
 
       FloatingActionButton({
         clickFun: () => {
-          HMRouter({pageUrl:"CollectionEdit"})
+          console.log("111")
+          HMRouterMgr.push({ pageUrl: 'CollectionEdit' })
+          console.log("2222")
         }
       })
     }

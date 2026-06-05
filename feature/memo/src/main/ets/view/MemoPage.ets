@@ -1,8 +1,7 @@
 /**
  * 备忘录列表页
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Memo } from 'core.model';
 import { DateUtil } from 'core.util';
 import { EmptyState, FloatingActionButton } from 'core.ui';
@@ -57,7 +56,7 @@ export struct MemoPage {
                 Column() {
                   Text(memo.content)
                     .fontSize(14)
-                    .fontColor('#333333')
+                    .fontColor('#1F1F1F')
                     .width('100%')
                     .maxLines(3)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -65,7 +64,7 @@ export struct MemoPage {
                   Row() {
                     Text(DateUtil.formatTimestamp(memo.createTime))
                       .fontSize(12)
-                      .fontColor('#999999')
+                      .fontColor('#A6A6A6')
 
                     Blank()
 
@@ -82,9 +81,9 @@ export struct MemoPage {
                 .borderRadius(8)
                 .margin({ bottom: 8 })
                 .onClick(() => {
-                  router.pushUrl({
-                    url: 'pages/memo/MemoEdit',
-                    params: { id: memo.id }
+                  HMRouterMgr.push({
+                    pageUrl: 'MemoEdit',
+                    param: { id: memo.id }
                   });
                 })
               }
@@ -101,7 +100,7 @@ export struct MemoPage {
 
       FloatingActionButton({
         clickFun: () => {
-          router.pushUrl({ url: 'pages/memo/MemoEdit' });
+          HMRouterMgr.push({ pageUrl: 'MemoEdit' });
         }
       })
     }

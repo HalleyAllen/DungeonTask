@@ -145,11 +145,11 @@ export struct MainPage {
       Image(icon)
         .width(24)
         .height(24)
-        .fillColor(this.currentTab === index ? '#1890FF' : '#999999')
+        .fillColor(this.currentTab === index ? '#1677FF' : '#A6A6A6')
 
       Text(title)
         .fontSize(12)
-        .fontColor(this.currentTab === index ? '#1890FF' : '#999999')
+        .fontColor(this.currentTab === index ? '#1677FF' : '#A6A6A6')
         .margin({ top: 4 })
     }
     .width('100%')

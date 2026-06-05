@@ -1,8 +1,7 @@
 /**
  * 习惯管理列表页（通用抽象：健身房/阅读/冥想… + 结构化打卡）
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Habit, HabitLog } from 'core.model';
 import { DateUtil } from 'core.util';
 import { EmptyState, FloatingActionButton } from 'core.ui';
@@ -38,7 +37,7 @@ export struct HabitPage {
               .fontWeight(FontWeight.Bold)
             Text(DateUtil.getWeekDayName(DateUtil.getTodayWeekDay()))
               .fontSize(14)
-              .fontColor('#666666')
+              .fontColor('#A6A6A6')
               .margin({ left: 8 })
           }
           .width('100%')
@@ -78,7 +77,7 @@ export struct HabitPage {
                   Column() {
                     Text(cat)
                       .fontSize(14)
-                      .fontColor('#999999')
+                      .fontColor('#A6A6A6')
                       .padding({ left: 16, top: 12, bottom: 4 })
                       .width('100%')
                   }
@@ -101,7 +100,7 @@ export struct HabitPage {
 
       FloatingActionButton({
         clickFun: () => {
-          router.pushUrl({ url: 'pages/habit/HabitEdit' });
+          HMRouterMgr.push({ pageUrl: 'HabitEdit' });
         }
       })
     }
@@ -115,28 +114,28 @@ export struct HabitPage {
       Column() {
         Text(`${habit.icon || '⭐'} ${habit.name}`)
           .fontSize(16)
-          .fontColor('#333333')
+          .fontColor('#1F1F1F')
 
         Row() {
           Text(habit.category || '未分类')
             .fontSize(11)
             .fontColor('#FFFFFF')
             .padding({ left: 6, right: 6, top: 2, bottom: 2 })
-            .backgroundColor(habit.color || '#999999')
+            .backgroundColor(habit.color || '#A6A6A6')
             .borderRadius(4)
 
           // 目标摘要
           if (this.vm.targetText(habit)) {
             Text(`🎯 ${this.vm.targetText(habit)}`)
               .fontSize(12)
-              .fontColor('#999999')
+              .fontColor('#A6A6A6')
               .margin({ left: 6 })
           }
 
           if (habit.frequency === 2 && habit.weekDays) {
             Text(`· 周${this.vm.weekDayNames(habit.weekDays)}`)
               .fontSize(12)
-              .fontColor('#999999')
+              .fontColor('#A6A6A6')
               .margin({ left: 6 })
           }
         }
@@ -159,7 +158,7 @@ export struct HabitPage {
         Button((this.vm.todayChecked.get(habit.id) ?? false) ? '✓ 已打卡' : '打卡')
           .fontSize(14)
           .fontColor('#FFFFFF')
-          .backgroundColor((this.vm.todayChecked.get(habit.id) ?? false) ? '#8C8C8C' : '#52C41A')
+          .backgroundColor((this.vm.todayChecked.get(habit.id) ?? false) ? '#A6A6A6' : '#52C41A')
           .borderRadius(16)
           .padding({ left: 16, right: 16, top: 8, bottom: 8 })
           .onClick(() => this.vm.toggleCheckin(habit))

@@ -1,8 +1,7 @@
 /**
  * 任务列表页
  */
-import { router } from '@kit.ArkUI';
-import { HMRouter } from '@hadss/hmrouter';
+import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Task } from 'core.model';
 import { TaskViewModel } from '../viewmodel/TaskViewModel';
 import { EmptyState, FloatingActionButton } from 'core.ui';
@@ -36,7 +35,7 @@ export struct TaskPage {
 
       FloatingActionButton({
         clickFun: () => {
-          router.pushUrl({ url: 'pages/task/TaskEdit' });
+          HMRouterMgr.push({ pageUrl: 'TaskEdit' });
         }
       })
     }
@@ -56,14 +55,14 @@ export struct TaskPage {
       if (this.isReordering) {
         Text('完成')
           .fontSize(15)
-          .fontColor('#1890FF')
+          .fontColor('#1677FF')
           .onClick(() => {
             this.finishReorder();
           })
       } else {
         Text('排序')
           .fontSize(15)
-          .fontColor('#1890FF')
+          .fontColor('#1677FF')
           .margin({ right: 12 })
           .onClick(() => {
             this.startReorder();
@@ -81,8 +80,8 @@ export struct TaskPage {
       Text('全部')
         .fontSize(14)
         .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-        .backgroundColor(this.currentTab === 'all' ? '#1890FF' : '#E8E8E8')
-        .fontColor(this.currentTab === 'all' ? '#FFFFFF' : '#333333')
+        .backgroundColor(this.currentTab === 'all' ? '#1677FF' : '#F5F5F5')
+        .fontColor(this.currentTab === 'all' ? '#FFFFFF' : '#1F1F1F')
         .borderRadius(16)
         .onClick(() => {
           this.currentTab = 'all';
@@ -92,8 +91,8 @@ export struct TaskPage {
       Text('今日')
         .fontSize(14)
         .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-        .backgroundColor(this.currentTab === 'today' ? '#1890FF' : '#E8E8E8')
-        .fontColor(this.currentTab === 'today' ? '#FFFFFF' : '#333333')
+        .backgroundColor(this.currentTab === 'today' ? '#1677FF' : '#F5F5F5')
+        .fontColor(this.currentTab === 'today' ? '#FFFFFF' : '#1F1F1F')
         .borderRadius(16)
         .margin({ left: 12 })
         .onClick(() => {
@@ -104,8 +103,8 @@ export struct TaskPage {
       Text('本周')
         .fontSize(14)
         .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-        .backgroundColor(this.currentTab === 'week' ? '#1890FF' : '#E8E8E8')
-        .fontColor(this.currentTab === 'week' ? '#FFFFFF' : '#333333')
+        .backgroundColor(this.currentTab === 'week' ? '#1677FF' : '#F5F5F5')
+        .fontColor(this.currentTab === 'week' ? '#FFFFFF' : '#1F1F1F')
         .borderRadius(16)
         .margin({ left: 12 })
         .onClick(() => {
@@ -189,7 +188,7 @@ export struct TaskPage {
         Column() {
           Text('⬆')
             .fontSize(14)
-            .fontColor(index > 0 ? '#1890FF' : '#CCCCCC')
+            .fontColor(index > 0 ? '#1677FF' : '#D9D9D9')
             .height(24)
             .width(32)
             .textAlign(TextAlign.Center)
@@ -201,7 +200,7 @@ export struct TaskPage {
 
           Text('⬇')
             .fontSize(14)
-            .fontColor(index < this.dragList.length - 1 ? '#1890FF' : '#CCCCCC')
+            .fontColor(index < this.dragList.length - 1 ? '#1677FF' : '#D9D9D9')
             .height(24)
             .width(32)
             .textAlign(TextAlign.Center)
@@ -216,7 +215,7 @@ export struct TaskPage {
         // 正常模式：复选框
         Checkbox()
           .select(task.completed === 1)
-          .selectedColor('#1890FF')
+          .selectedColor('#1677FF')
           .onChange((value: boolean) => {
             this.viewModel.toggleComplete(task);
           })
@@ -225,12 +224,12 @@ export struct TaskPage {
       Column() {
         Text(task.title)
           .fontSize(16)
-          .fontColor(task.completed === 1 ? '#999999' : '#333333')
+          .fontColor(task.completed === 1 ? '#A6A6A6' : '#1F1F1F')
           // .decoration(task.completed === 1 ? TextDecorationType.LineThrough : TextDecorationType.None)
 
         Text(task.date)
           .fontSize(12)
-          .fontColor('#999999')
+          .fontColor('#A6A6A6')
           .margin({ top: 4 })
       }
       .alignItems(HorizontalAlign.Start)
@@ -252,9 +251,9 @@ export struct TaskPage {
     .margin({ bottom: 8 })
     .onClick(() => {
       if (!this.isReordering) {
-        router.pushUrl({
-          url: 'pages/task/TaskEdit',
-          params: { id: task.id }
+        HMRouterMgr.push({
+          pageUrl: 'TaskEdit',
+          param: { id: task.id }
         });
       }
     })
