@@ -32,6 +32,12 @@ export interface CollectionTypeItem {
   isBuiltIn: number;
 }
 
+/** 子项 */
+export interface CollectionSubItem {
+  text: string;
+  completed: boolean;
+}
+
 /** 收藏扩展数据（extra字段JSON结构） */
 export interface CollectionExtra {
   pinyin?: string;
@@ -39,4 +45,8 @@ export interface CollectionExtra {
   source?: string;
   author?: string;
   desc?: string;
+  /** 截至日期时间戳(ms) */
+  deadline?: number;
+  /** 子项清单 */
+  subItems?: CollectionSubItem[];
 }

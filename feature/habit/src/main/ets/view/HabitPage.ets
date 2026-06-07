@@ -4,7 +4,7 @@
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Habit, HabitLog } from 'core.model';
 import { DateUtil } from 'core.util';
-import { EmptyState, FloatingActionButton } from 'core.ui';
+import { EmptyState } from 'core.ui';
 import { HabitPageViewModel } from '../viewmodel/HabitPageViewModel';
 
 @HMRouter({ pageUrl: 'HabitPage' })
@@ -17,95 +17,107 @@ export struct HabitPage {
   }
 
   build() {
-    Stack() {
+    Column() {
+      // 标题栏
+      Row() {
+        Text('习惯')
+          .fontSize(20)
+          .fontWeight(FontWeight.Bold)
+      }
+      .width('100%')
+      .padding(16)
+      .backgroundColor('#FFFFFF')
+
+      // 今日打卡
       Column() {
-        // 标题栏
         Row() {
-          Text('习惯')
-            .fontSize(20)
+          Text('今日打卡')
+            .fontSize(16)
             .fontWeight(FontWeight.Bold)
+          Text(DateUtil.getWeekDayName(DateUtil.getTodayWeekDay()))
+            .fontSize(14)
+            .fontColor('#A6A6A6')
+            .margin({ left: 8 })
         }
         .width('100%')
         .padding(16)
         .backgroundColor('#FFFFFF')
 
-        // 今日打卡
-        Column() {
-          Row() {
-            Text('今日打卡')
-              .fontSize(16)
-              .fontWeight(FontWeight.Bold)
-            Text(DateUtil.getWeekDayName(DateUtil.getTodayWeekDay()))
-              .fontSize(14)
-              .fontColor('#A6A6A6')
-              .margin({ left: 8 })
+        if (this.vm.todayHabits.length === 0) {
+          EmptyState({ message: '今天没有需要打卡的习惯', icon: '🔄' })
+            .height(120)
+        } else {
+          List() {
+            ForEach(this.vm.todayHabits, (habit: Habit) => {
+              ListItem() { this.habitItem(habit, true) }
+            })
           }
+          .padding({ left: 16, right: 16 })
+        }
+      }
+      .margin({ top: 8 })
+
+      // 全部习惯（按分类分组）
+      Column() {
+        Text('全部习惯')
+          .fontSize(16)
+          .fontWeight(FontWeight.Bold)
           .width('100%')
           .padding(16)
           .backgroundColor('#FFFFFF')
 
-          if (this.vm.todayHabits.length === 0) {
-            EmptyState({ message: '今天没有需要打卡的习惯', icon: '🔄' })
-              .height(120)
-          } else {
-            List() {
-              ForEach(this.vm.todayHabits, (habit: Habit) => {
-                ListItem() { this.habitItem(habit, true) }
-              })
-            }
-            .padding({ left: 16, right: 16 })
-          }
-        }
-        .margin({ top: 8 })
-
-        // 全部习惯（按分类分组）
-        Column() {
-          Text('全部习惯')
-            .fontSize(16)
-            .fontWeight(FontWeight.Bold)
-            .width('100%')
-            .padding(16)
-            .backgroundColor('#FFFFFF')
-
-          if (this.vm.habits.length === 0) {
-            EmptyState({ message: '还没有习惯，点击下方添加', icon: '⭐' })
-              .height(200)
-          } else {
-            List() {
-              ForEach(this.vm.categories, (cat: string) => {
-                ListItem() {
-                  Column() {
-                    Text(cat)
-                      .fontSize(14)
-                      .fontColor('#A6A6A6')
-                      .padding({ left: 16, top: 12, bottom: 4 })
-                      .width('100%')
-                  }
+        if (this.vm.habits.length === 0) {
+          EmptyState({ message: '还没有习惯，点击下方添加', icon: '⭐' })
+            .height(200)
+        } else {
+          List() {
+            ForEach(this.vm.categories, (cat: string) => {
+              ListItem() {
+                Column() {
+                  Text(cat)
+                    .fontSize(14)
+                    .fontColor('#A6A6A6')
+                    .padding({ left: 16, top: 12, bottom: 4 })
+                    .width('100%')
                 }
+              }
 
-                ForEach(this.vm.habits.filter(h => h.category === cat), (habit: Habit) => {
-                  ListItem() { this.habitItem(habit, false) }
-                })
+              ForEach(this.vm.habits.filter(h => h.category === cat), (habit: Habit) => {
+                ListItem() { this.habitItem(habit, false) }
               })
-            }
-            .padding({ left: 16, right: 16 })
+            })
           }
+          .padding({ left: 16, right: 16 })
         }
-        .layoutWeight(1)
-        .margin({ top: 8 })
       }
-      .width('100%')
-      .height('100%')
-      .backgroundColor('#F5F5F5')
+      .layoutWeight(1)
+      .margin({ top: 8 })
 
-      FloatingActionButton({
-        clickFun: () => {
-          HMRouterMgr.push({ pageUrl: 'HabitEdit' });
-        }
+      // FAB
+      Button() {
+        Text('＋')
+          .fontSize(24)
+          .fontWeight(FontWeight.Regular)
+          .fontColor('#FFFFFF')
+      }
+      .position({ right: 24, bottom: 32 })
+      .width(48)
+      .height(48)
+      .backgroundColor('#1677FF')
+      .borderRadius(24)
+      .shadow({
+        radius: 12,
+        color: 'rgba(0, 0, 0, 0.15)',
+        offsetX: 0,
+        offsetY: 6
+      })
+      .onClick(() => {
+        HMRouterMgr.push({ pageUrl: 'HabitEdit' });
       })
     }
     .width('100%')
     .height('100%')
+    .backgroundColor('#F5F5F5')
   }
 
   @Builder

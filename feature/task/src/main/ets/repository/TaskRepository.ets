@@ -29,6 +29,21 @@ export class TaskRepository {
   }
 
   /**
+   * 查询日期范围内的任务
+   */
+  async queryByDateRange(startDate: string, endDate: string): Promise<Task[]> {
+    const store = this.getStore();
+    const predicates = new relationalStore.RdbPredicates(this.TABLE);
+    predicates.greaterThanOrEqualTo('date', startDate);
+    predicates.lessThanOrEqualTo('date', endDate);
+    predicates.orderByDesc('priority');
+    predicates.orderByAsc('sortOrder');
+
+    const result = await store.query(predicates);
+    return this.parseResult(result);
+  }
+
+  /**
    * 查询顶级任务（parentId=0）指定日期
    */
   async queryTopLevel(date: string): Promise<Task[]> {
@@ -70,6 +85,85 @@ export class TaskRepository {
   }
 
   /**
+   * 查询所有不重复标签
+   */
+  async queryTags(): Promise<string[]> {
+    const all = await this.queryAll();
+    const tagSet = new Set<string>();
+    for (const t of all) {
+      if (t.tag) {
+        const tags = t.tag.split(',').map(s => s.trim()).filter(s => s);
+        for (const tag of tags) {
+          tagSet.add(tag);
+        }
+      }
+    }
+    const result: string[] = [];
+    tagSet.forEach(tag => result.push(tag));
+    return result;
+  }
+
+  /**
+   * 按标签筛选任务（模糊匹配 tag 字段）
+   */
+  async queryByTag(tag: string): Promise<Task[]> {
+    const all = await this.queryAll();
+    return all.filter(t => t.tag.includes(tag));
+  }
+
+  /**
+   * 重命名标签：更新所有包含 oldTag 的任务
+   */
+  async renameTag(oldTag: string, newTag: string): Promise<void> {
+    const all = await this.queryAll();
+    const store = this.getStore();
+    const now = DateUtil.getNow();
+    for (const t of all) {
+      if (!t.tag) continue;
+      const tags = t.tag.split(',').map(s => s.trim());
+      const idx = tags.indexOf(oldTag);
+      if (idx >= 0) {
+        tags[idx] = newTag;
+        const newTagStr = tags.join(',');
+        const predicates = new relationalStore.RdbPredicates(this.TABLE);
+        predicates.equalTo('id', t.id);
+        const vb: relationalStore.ValuesBucket = {
+          tag: newTagStr,
+          syncStatus: 0,
+          updateTime: now
+        };
+        await store.update(vb, predicates);
+      }
+    }
+  }
+
+  /**
+   * 删除标签：从所有任务中移除该标签
+   */
+  async deleteTag(tag: string): Promise<void> {
+    const all = await this.queryAll();
+    const store = this.getStore();
+    const now = DateUtil.getNow();
+    for (const t of all) {
+      if (!t.tag) continue;
+      const tags = t.tag.split(',').map(s => s.trim());
+      const idx = tags.indexOf(tag);
+      if (idx >= 0) {
+        tags.splice(idx, 1);
+        const newTagStr = tags.join(',');
+        const predicates = new relationalStore.RdbPredicates(this.TABLE);
+        predicates.equalTo('id', t.id);
+        const vb: relationalStore.ValuesBucket = {
+          tag: newTagStr,
+          syncStatus: 0,
+          updateTime: now
+        };
+        await store.update(vb, predicates);
+      }
+    }
+  }
+
+  /**
    * 按ID查询
    */
   async queryById(id: number): Promise<Task | null> {
@@ -97,6 +191,7 @@ export class TaskRepository {
       parentId: task.parentId || 0,
       level: task.level || 0,
       sortOrder: task.sortOrder || 0,
+      tag: task.tag || '',
       deviceId: task.deviceId || '',
       syncStatus: 0,
       createTime: task.createTime || now,
@@ -147,6 +242,7 @@ export class TaskRepository {
       parentId: task.parentId,
       level: task.level,
       sortOrder: task.sortOrder,
+      tag: task.tag || '',
       deviceId: task.deviceId,
       syncStatus: 0,
       updateTime: DateUtil.getNow()
@@ -260,6 +356,7 @@ export class TaskRepository {
             parentId: task.parentId,
             level: task.level,
             sortOrder: task.sortOrder,
+            tag: task.tag || '',
             deviceId: task.deviceId,
             syncStatus: 1,
             updateTime: task.updateTime
@@ -322,6 +419,7 @@ export class TaskRepository {
       task.parentId = result.getLong(result.getColumnIndex('parentId'));
       task.level = result.getLong(result.getColumnIndex('level'));
       task.sortOrder = result.getLong(result.getColumnIndex('sortOrder'));
+      task.tag = result.getString(result.getColumnIndex('tag'));
       task.deviceId = result.getString(result.getColumnIndex('deviceId'));
       task.syncStatus = result.getLong(result.getColumnIndex('syncStatus'));
       task.createTime = result.getLong(result.getColumnIndex('createTime'));

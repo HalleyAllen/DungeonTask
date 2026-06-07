@@ -207,6 +207,9 @@ export struct SettingsPage {
         this.clearConfirmText = '';
         this.showClearDialog = true;
         break;
+      case 'test_page':
+        HMRouterMgr.push({ pageUrl: 'TestPage' });
+        break;
     }
   }
 

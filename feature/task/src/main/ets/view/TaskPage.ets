@@ -1,46 +1,52 @@
 /**
  * 任务列表页
  */
-import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
+import { HMRouter } from '@hadss/hmrouter';
 import { Task } from 'core.model';
 import { TaskViewModel } from '../viewmodel/TaskViewModel';
-import { EmptyState, FloatingActionButton } from 'core.ui';
-import { DateUtil } from 'core.util';
+import { EmptyState } from 'core.ui';
 
 @HMRouter({ pageUrl: 'TaskPage' })
 @Component
 export struct TaskPage {
   @State viewModel: TaskViewModel = new TaskViewModel();
-  @State currentTab: string = 'today';
-  @State isReordering: boolean = false;
-  // 拖拽过程中的临时列表
-  @State dragList: Task[] = [];
-  @State dragFrom: number = -1;
-  @State dragTo: number = -1;
 
   aboutToAppear() {
-    this.viewModel.loadTasks();
+    this.viewModel.filterByDate('today');
+    this.viewModel.loadFilterTags();
   }
 
   build() {
-    Stack() {
-      Column() {
-        this.titleBar()
-        this.filterBar()
-        this.taskList()
+    Column() {
+      this.titleBar()
+      this.filterBar()
+      this.taskList()
+      // FAB：用绝对定位避免 Stack 层叠干扰 bindMenu
+      Button() {
+        Text('＋')
+          .fontSize(24)
+          .fontWeight(FontWeight.Regular)
+          .fontColor('#FFFFFF')
       }
-      .width('100%')
-      .height('100%')
-      .backgroundColor('#F5F5F5')
-
-      FloatingActionButton({
-        clickFun: () => {
-          HMRouterMgr.push({ pageUrl: 'TaskEdit' });
-        }
+      .position({ right: 24, bottom: 32 })
+      .width(48)
+      .height(48)
+      .backgroundColor('#1677FF')
+      .borderRadius(24)
+      .shadow({
+        radius: 12,
+        color: 'rgba(0, 0, 0, 0.15)',
+        offsetX: 0,
+        offsetY: 6
+      })
+      .onClick(() => {
+        this.viewModel.goToEditPage();
       })
     }
     .width('100%')
     .height('100%')
+    .backgroundColor('#F5F5F5')
+
   }
 
   @Builder
@@ -52,22 +58,12 @@ export struct TaskPage {
 
       Blank()
 
-      if (this.isReordering) {
-        Text('完成')
-          .fontSize(15)
-          .fontColor('#1677FF')
-          .onClick(() => {
-            this.finishReorder();
-          })
-      } else {
-        Text('排序')
-          .fontSize(15)
-          .fontColor('#1677FF')
-          .margin({ right: 12 })
-          .onClick(() => {
-            this.startReorder();
-          })
-      }
+        Text('⚙')
+          .fontSize(20)
+          .fontColor('#A6A6A6')
+        .width(40)
+        .height(40)
+        .bindMenu(this.SettingsMenuBuilder)
     }
     .width('100%')
     .padding({ left: 16, right: 16, top: 12, bottom: 12 })
@@ -76,98 +72,93 @@ export struct TaskPage {
 
   @Builder
   filterBar() {
-    Row() {
-      Text('全部')
-        .fontSize(14)
-        .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-        .backgroundColor(this.currentTab === 'all' ? '#1677FF' : '#F5F5F5')
-        .fontColor(this.currentTab === 'all' ? '#FFFFFF' : '#1F1F1F')
-        .borderRadius(16)
-        .onClick(() => {
-          this.currentTab = 'all';
-          this.viewModel.loadAllTasks();
-        })
+    List() {
+      // 全部（固定第一项）
+      ListItem() {
+        Text('全部')
+          .fontSize(14)
+          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          .backgroundColor(!this.viewModel.currentTag ? '#1677FF' : '#F5F5F5')
+          .fontColor(!this.viewModel.currentTag ? '#FFFFFF' : '#1F1F1F')
+          .borderRadius(16)
+          .onClick(() => {
+            this.viewModel.filterByTag('');
+          })
+      }
 
-      Text('今日')
-        .fontSize(14)
-        .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-        .backgroundColor(this.currentTab === 'today' ? '#1677FF' : '#F5F5F5')
-        .fontColor(this.currentTab === 'today' ? '#FFFFFF' : '#1F1F1F')
-        .borderRadius(16)
-        .margin({ left: 12 })
-        .onClick(() => {
-          this.currentTab = 'today';
-          this.viewModel.loadTasks();
-        })
+      // 标签筛选下拉
+      ListItem() {
+        Text('▼')
+          .fontSize(10)
+          .fontColor('#8C8C8C')
+          .padding({ left: 8, right: 8, top: 6, bottom: 6 })
+          .backgroundColor('#F5F5F5')
+          .borderRadius(4)
+      }
+        .bindMenu(this.TagMenuBuilder)
+        .margin({ left: 8 })
 
-      Text('本周')
-        .fontSize(14)
-        .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-        .backgroundColor(this.currentTab === 'week' ? '#1677FF' : '#F5F5F5')
-        .fontColor(this.currentTab === 'week' ? '#FFFFFF' : '#1F1F1F')
-        .borderRadius(16)
+      ForEach(this.viewModel.filterTags, (tag: string) => {
+        ListItem() {
+          Text(tag)
+            .fontSize(14)
+            .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+            .backgroundColor(this.viewModel.currentTag === tag ? '#1677FF' : '#F5F5F5')
+            .fontColor(this.viewModel.currentTag === tag ? '#FFFFFF' : '#1F1F1F')
+            .borderRadius(16)
+            .onClick(() => {
+              this.viewModel.filterByTag(tag);
+            })
+        }
         .margin({ left: 12 })
-        .onClick(() => {
-          this.currentTab = 'week';
-          this.viewModel.loadTasks();
-        })
+      })
     }
+    .listDirection(Axis.Horizontal)
+    .scrollBar(BarState.Off)
     .width('100%')
     .padding({ left: 16, top: 12, bottom: 12 })
     .backgroundColor('#FFFFFF')
   }
 
-  // ---- 拖拽排序 ----
-
-  startReorder() {
-    // 深拷贝当前列表用于拖拽操作
-    this.dragList = this.viewModel.taskList.map(t => {
-      const copy = new Task();
-      copy.id = t.id;
-      copy.title = t.title;
-      copy.content = t.content;
-      copy.date = t.date;
-      copy.completed = t.completed;
-      copy.priority = t.priority;
-      copy.parentId = t.parentId;
-      copy.level = t.level;
-      copy.sortOrder = t.sortOrder;
-      copy.createTime = t.createTime;
-      copy.updateTime = t.updateTime;
-      return copy;
-    });
-    this.isReordering = true;
+  @Builder
+  SettingsMenuBuilder() {
+    Menu() {
+      MenuItem({ content: '标签管理' })
+        .onClick(() => {
+          this.viewModel.goToTagManage();
+        })
+      MenuItem({ content: '排序' })
+        .onClick(() => {
+          if (!this.viewModel.isReordering) {
+            this.viewModel.startReorder();
+          } else {
+            this.viewModel.finishReorder();
+          }
+        })
+    }
   }
 
-  async finishReorder() {
-    // 将最终顺序持久化：按数组位置分配 priority
-    const count = this.dragList.length;
-    for (let i = 0; i < count; i++) {
-      this.dragList[i].priority = count - i; // 第0位 priority最高
+  @Builder
+  TagMenuBuilder() {
+    Menu() {
+      ForEach(this.viewModel.filterTags, (tag: string) => {
+        MenuItem({ content: tag })
+          .onClick(() => {
+            this.viewModel.filterByTag(tag);
+          })
+      })
     }
-    await this.viewModel.saveOrder(this.dragList);
-    this.isReordering = false;
-    this.dragList = [];
-  }
-
-  moveItem(from: number, to: number) {
-    if (from === to || from < 0 || to < 0 ||
-      from >= this.dragList.length || to >= this.dragList.length) {
-      return;
-    }
-    const item = this.dragList.splice(from, 1)[0];
-    this.dragList.splice(to, 0, item);
   }
 
   // ---- 列表 ----
 
   @Builder
   taskList() {
-    if ((this.isReordering ? this.dragList : this.viewModel.taskList).length === 0) {
+    if ((this.viewModel.isReordering ? this.viewModel.dragList : this.viewModel.taskList).length === 0) {
       EmptyState({ message: '暂无任务，点击下方按钮添加' })
     } else {
       List() {
-        ForEach(this.isReordering ? this.dragList : this.viewModel.taskList,
+        ForEach(this.viewModel.isReordering ? this.viewModel.dragList : this.viewModel.taskList,
           (task: Task, index: number) => {
             ListItem() {
               this.taskItem(task, index)
@@ -176,6 +167,7 @@ export struct TaskPage {
       }
       .width('100%')
       .layoutWeight(1)
+      .backgroundColor("#f5f5f5")
       .padding({ left: 16, right: 16 })
     }
   }
@@ -183,7 +175,7 @@ export struct TaskPage {
   @Builder
   taskItem(task: Task, index: number) {
     Row() {
-      if (this.isReordering) {
+      if (this.viewModel.isReordering) {
         // 拖拽手柄 + 上/下移动按钮
         Column() {
           Text('⬆')
@@ -194,19 +186,19 @@ export struct TaskPage {
             .textAlign(TextAlign.Center)
             .onClick(() => {
               if (index > 0) {
-                this.moveItem(index, index - 1);
+                this.viewModel.moveItem(index, index - 1);
               }
             })
 
           Text('⬇')
             .fontSize(14)
-            .fontColor(index < this.dragList.length - 1 ? '#1677FF' : '#D9D9D9')
+            .fontColor(index < this.viewModel.dragList.length - 1 ? '#1677FF' : '#D9D9D9')
             .height(24)
             .width(32)
             .textAlign(TextAlign.Center)
             .onClick(() => {
-              if (index < this.dragList.length - 1) {
-                this.moveItem(index, index + 1);
+              if (index < this.viewModel.dragList.length - 1) {
+                this.viewModel.moveItem(index, index + 1);
               }
             })
         }
@@ -236,7 +228,7 @@ export struct TaskPage {
       .margin({ left: 12 })
       .layoutWeight(1)
 
-      if (!this.isReordering) {
+      if (!this.viewModel.isReordering) {
         Text('🗑️')
           .fontSize(18)
           .onClick(() => {
@@ -250,11 +242,8 @@ export struct TaskPage {
     .borderRadius(8)
     .margin({ bottom: 8 })
     .onClick(() => {
-      if (!this.isReordering) {
-        HMRouterMgr.push({
-          pageUrl: 'TaskEdit',
-          param: { id: task.id }
-        });
+      if (!this.viewModel.isReordering) {
+        this.viewModel.goToEditPage(task.id);
       }
     })
   }

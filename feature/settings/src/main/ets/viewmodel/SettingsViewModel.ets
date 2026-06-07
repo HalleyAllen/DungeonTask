@@ -108,6 +108,12 @@ export class SettingsViewModel {
         ]
       },
       {
+        title: '开发调试',
+        items: [
+          { label: '测试页面', type: 'nav', actionId: 'test_page' }
+        ]
+      },
+      {
         title: '关于',
         items: [
           { label: `版本 ${this.appVersion}`, type: 'info' },
