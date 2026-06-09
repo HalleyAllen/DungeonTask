@@ -78,6 +78,7 @@ export class DbHelper {
         parentId INTEGER DEFAULT 0,
         level INTEGER DEFAULT 0,
         sortOrder INTEGER DEFAULT 0,
+        tag TEXT DEFAULT '',
         deviceId TEXT DEFAULT '',
         syncStatus INTEGER DEFAULT 0,
         createTime INTEGER NOT NULL,

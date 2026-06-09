@@ -11,7 +11,7 @@ import { HMRouterMgr } from '@hadss/hmrouter';
 export class TaskViewModel {
   taskList: Task[] = [];
   /** 筛选标签列表 */
-  filterTags: string[] = [];
+  filterTags: string[] = ["全部"];
   /** 当前选中标签（'' 表示全部） */
   currentTag: string = '';
   /** 日期筛选：'all' | 'today' | 'week' */

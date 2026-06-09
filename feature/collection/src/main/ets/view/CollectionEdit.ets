@@ -9,9 +9,9 @@ import { DatePickerModule } from 'core.ui';
 import { CollectionEditViewModel } from '../viewmodel/CollectionEditViewModel';
 
 @HMRouter({ pageUrl: 'CollectionEdit' })
-@Component
+@ComponentV2
 export struct CollectionEdit {
-  @State vm: CollectionEditViewModel = new CollectionEditViewModel();
+  @Local vm: CollectionEditViewModel = new CollectionEditViewModel();
 
   aboutToAppear() {
     const params = HMRouterMgr.getCurrentParam() as EditPageParams;
@@ -47,90 +47,75 @@ export struct CollectionEdit {
 
         Scroll() {
           Column() {
+            // ===================== 记录样式 =====================
+            Text('🎨 记录样式')
+              .fontSize(15)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1F1F1F')
+              .width('100%')
+              .margin({ bottom: 12 })
+
             // 类型选择
             Text('类型')
-              .fontSize(14)
+              .fontSize(13)
               .fontColor('#A6A6A6')
               .width('100%')
-              .margin({ bottom: 8 })
+              .margin({ bottom: 6 })
 
-            Row() {
-              ForEach(this.vm.types, (t: CollectionTypeItem) => {
-                Text(t.label)
+            Scroll() {
+              Row() {
+                ForEach(this.vm.types, (t: CollectionTypeItem) => {
+                  Text(t.label)
+                    .fontSize(14)
+                    .fontColor(this.vm.itemType === t.value ? '#FFFFFF' : '#1F1F1F')
+                    .backgroundColor(this.vm.itemType === t.value ? '#1677FF' : '#F5F5F5')
+                    .borderRadius(16)
+                    .padding({ left: 14, right: 14, top: 7, bottom: 7 })
+                    .margin({ right: 8 })
+                    .onClick(() => { this.vm.itemType = t.value; })
+                })
+
+                Text('＋')
                   .fontSize(14)
-                  .fontColor(this.vm.itemType === t.value ? '#FFFFFF' : '#1F1F1F')
-                  .backgroundColor(this.vm.itemType === t.value ? '#1677FF' : '#F5F5F5')
-                  .borderRadius(8)
-                  .padding({ left: 14, right: 14, top: 8, bottom: 8 })
-                  .margin({ right: 8 })
-                  .onClick(() => { this.vm.itemType = t.value; })
-              })
+                  .fontColor('#1677FF')
+                  .backgroundColor('#F5F5F5')
+                  .borderRadius(16)
+                  .padding({ left: 14, right: 14, top: 7, bottom: 7 })
+                  .onClick(() => {
+                    this.vm.showAddTypeDialog = true;
+                  })
+              }
             }
+            .scrollable(ScrollDirection.Horizontal)
+            .scrollBar(BarState.Off)
+            .width('100%')
 
-            // 新建类型按钮
-            Text('＋ 新建类型')
-              .fontSize(14)
-              .fontColor('#1677FF')
-              .fontWeight(FontWeight.Medium)
-              .margin({ top: 12 })
-              .onClick(() => {
-                this.vm.showAddTypeDialog = true;
-              })
-
-            Divider().margin({ top: 24, bottom: 24 })
-
-            // 标题（必填）
-            Text('标题 *')
-              .fontSize(14)
+            // 类型提示
+            Text(this.vm.getTypeHint())
+              .fontSize(12)
               .fontColor('#A6A6A6')
               .width('100%')
-              .margin({ bottom: 8 })
+              .margin({ top: 6 })
 
-            TextInput({ placeholder: this.vm.getTitlePlaceholder(), text: this.vm.title })
-              .width('100%')
-              .height(48)
-              .backgroundColor('#F5F5F5')
-              .borderRadius(8)
-              .onChange((value: string) => {
-                this.vm.title = value;
-              })
-
-            // 内容
-            Text('内容')
-              .fontSize(14)
-              .fontColor('#A6A6A6')
-              .width('100%')
-              .margin({ top: 24, bottom: 8 })
-
-            TextArea({ placeholder: this.vm.getContentPlaceholder(), text: this.vm.content })
-              .width('100%')
-              .height(120)
-              .backgroundColor('#F5F5F5')
-              .borderRadius(8)
-              .onChange((value: string) => {
-                this.vm.content = value;
-              })
-
-            Divider().margin({ top: 24, bottom: 24 })
-
-            // 根据类型显示不同扩展字段
-            if (this.vm.itemType === 'word') {
-              this.wordExtraFields()
-            } else if (this.vm.itemType === 'sentence' || this.vm.itemType === 'quote') {
-              this.sentenceExtraFields()
-            } else {
-              // 内置 knowledge 和自定义类型均显示通用描述字段
-              this.genericExtraFields()
-            }
-
-            Divider().margin({ top: 24, bottom: 24 })
+            Divider().margin({ top: 16, bottom: 16 })
 
             // 标签选择
-            Text('标签')
-              .fontSize(14)
-              .fontColor('#A6A6A6')
-              .width('100%')
-              .margin({ bottom: 8 })
+            Row() {
+              Text('标签')
+                .fontSize(13)
+                .fontColor('#A6A6A6')
+
+              Blank()
+
+              Text('管理 →')
+                .fontSize(12)
+                .fontColor('#1677FF')
+                .onClick(() => {
+                  HMRouterMgr.push({ pageUrl: 'CollectionTagManage' });
+                })
+            }
+            .width('100%')
+            .margin({ bottom: 6 })
 
             // 已选标签
             if (this.vm.selectedTags.length > 0) {
@@ -153,7 +138,7 @@ export struct CollectionEdit {
                 })
               }
               .width('100%')
-              .margin({ bottom: 12 })
+              .margin({ bottom: 10 })
             }
 
             // 下拉选择标签
@@ -168,7 +153,7 @@ export struct CollectionEdit {
                 .fontColor('#A6A6A6')
             }
             .width('100%')
-            .height(48)
+            .height(44)
             .backgroundColor('#F5F5F5')
             .borderRadius(8)
             .padding({ left: 12, right: 12 })
@@ -192,16 +177,75 @@ export struct CollectionEdit {
                 .onClick(() => this.vm.addCustomTag())
             }
             .width('100%')
-            .margin({ top: 12 })
+            .margin({ top: 10 })
 
             Divider().margin({ top: 24, bottom: 24 })
 
-            // 截至日期
-            Text('截至日期')
-              .fontSize(14)
+            // ===================== 内容区 =====================
+            Text('📝 内容')
+              .fontSize(15)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1F1F1F')
+              .width('100%')
+              .margin({ bottom: 12 })
+
+            // 标题（必填）
+            Text('标题 *')
+              .fontSize(13)
               .fontColor('#A6A6A6')
               .width('100%')
-              .margin({ bottom: 8 })
+              .margin({ bottom: 6 })
+
+            TextInput({ placeholder: this.vm.getTitlePlaceholder(), text: this.vm.title })
+              .width('100%')
+              .height(48)
+              .backgroundColor('#F5F5F5')
+              .borderRadius(8)
+              .onChange((value: string) => {
+                this.vm.title = value;
+              })
+
+            // 内容
+            Text('内容')
+              .fontSize(13)
+              .fontColor('#A6A6A6')
+              .width('100%')
+              .margin({ top: 20, bottom: 6 })
+
+            TextArea({ placeholder: this.vm.getContentPlaceholder(), text: this.vm.content })
+              .width('100%')
+              .height(120)
+              .backgroundColor('#F5F5F5')
+              .borderRadius(8)
+              .onChange((value: string) => {
+                this.vm.content = value;
+              })
+
+            // ===================== 扩展字段（根据类型） =====================
+            if (this.vm.itemType === 'word') {
+              this.wordExtraFields()
+            } else if (this.vm.itemType === 'sentence' || this.vm.itemType === 'quote') {
+              this.sentenceExtraFields()
+            } else {
+              this.genericExtraFields()
+            }
+
+            Divider().margin({ top: 24, bottom: 24 })
+
+            // ===================== 截止日期 & 子项 =====================
+            Text('⚙ 其他')
+              .fontSize(15)
+              .fontWeight(FontWeight.Bold)
+              .fontColor('#1F1F1F')
+              .width('100%')
+              .margin({ bottom: 12 })
+
+            // 截至日期
+            Text('截至日期')
+              .fontSize(13)
+              .fontColor('#A6A6A6')
+              .width('100%')
+              .margin({ bottom: 6 })
 
             DatePickerModule({
               deadline: this.vm.deadline,
@@ -214,14 +258,14 @@ export struct CollectionEdit {
               }
             })
 
-            Divider().margin({ top: 24, bottom: 24 })
+            Divider().margin({ top: 20, bottom: 20 })
 
             // 子项
             Text('子项清单')
-              .fontSize(14)
+              .fontSize(13)
               .fontColor('#A6A6A6')
               .width('100%')
-              .margin({ bottom: 8 })
+              .margin({ bottom: 6 })
 
             // 已有子项列表
             ForEach(this.vm.subItems, (sub: CollectionSubItem, index: number) => {

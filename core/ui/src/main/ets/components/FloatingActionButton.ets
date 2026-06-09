@@ -1,6 +1,6 @@
 /**
  * 悬浮操作按钮 - 遵循 Ant Design 5.x 规范
- * 主色 #1677FF，圆角阴影，固定右下角
+ * 主色 #1677FF，圆角阴影，固定右下角（基于 position 实现，不干扰触摸事件）
  */
 @Component
 export struct FloatingActionButton {
@@ -8,32 +8,27 @@ export struct FloatingActionButton {
   clickFun?: () => void;
 
   build() {
-    Column() {
-      Blank()
+    Button() {
       Text('＋')
-        .width(48)
-        .height(48)
         .fontSize(24)
         .fontWeight(FontWeight.Regular)
         .fontColor('#FFFFFF')
-        .backgroundColor('#1677FF')
-        .borderRadius(24)
-        .textAlign(TextAlign.Center)
-        .margin({ right: 24, bottom: 32 })
-        .alignSelf(ItemAlign.End)
-        .shadow({
-          radius: 12,
-          color: 'rgba(0, 0, 0, 0.15)',
-          offsetX: 0,
-          offsetY: 6
-        })
-        .onClick(() => {
-          if (this.clickFun) {
-            this.clickFun();
-          }
-        })
     }
-    .width('100%')
-    .height('100%')
+    .position({ right: 24, bottom: 32 })
+    .width(48)
+    .height(48)
+    .backgroundColor('#1677FF')
+    .borderRadius(24)
+    .shadow({
+      radius: 12,
+      color: 'rgba(0, 0, 0, 0.15)',
+      offsetX: 0,
+      offsetY: 6
+    })
+    .onClick(() => {
+      if (this.clickFun) {
+        this.clickFun();
+      }
+    })
   }
 }

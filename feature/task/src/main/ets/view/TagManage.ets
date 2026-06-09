@@ -2,13 +2,28 @@
  * 标签管理页面
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
-import { EmptyState } from 'core.ui';
+import { EmptyState, TextInputDialog } from 'core.ui';
 import { TagManageViewModel, TagStat } from '../viewmodel/TagManageViewModel';
 
 @HMRouter({ pageUrl: 'TagManage' })
 @Component
 export struct TagManagePage {
-  @State vm: TagManageViewModel = new TagManageViewModel();
+   vm: TagManageViewModel = new TagManageViewModel();
+
+  dialogController: CustomDialogController = new CustomDialogController({
+    builder: TextInputDialog({
+      title: '新建标签',
+      placeholder: '请输入标签名称',
+      maxLength: 20,
+      emptyError: '请输入标签名称',
+      onConfirm: (name: string): string => {
+        return this.vm.createTag(name);
+      }
+    }),
+    autoCancel: true,
+    alignment: DialogAlignment.Center,
+    customStyle: true
+  });
 
   aboutToAppear() {
     this.vm.loadTags();
@@ -29,7 +44,7 @@ export struct TagManagePage {
         .shadow({ radius: 8, color: 'rgba(22,119,255,0.3)' })
         .position({ right: 20, bottom: 30 })
         .onClick(() => {
-          this.vm.showAddDialog = true;
+          this.dialogController.open();
         })
     }
     .width('100%')
@@ -83,29 +98,51 @@ export struct TagManagePage {
 
   @Builder
   tagItem(stat:TagStat, index: number) {
-    Row() {
-      Text(stat.tag)
-        .fontSize(16)
-        .fontColor('#1F1F1F')
-        .layoutWeight(1)
+    Column() {
+      Row() {
+        Text(stat.tag)
+          .fontSize(16)
+          .fontWeight(FontWeight.Medium)
+          .fontColor('#1F1F1F')
+          .layoutWeight(1)
 
-      Text(`${stat.taskCount} 个任务`)
-        .fontSize(13)
-        .fontColor('#A6A6A6')
+        Text('✏️')
+          .fontSize(16)
+          .margin({ left: 12 })
+          .onClick(() => {
+            this.vm.startEdit(stat.tag);
+          })
 
-      Text('✏️')
-        .fontSize(16)
-        .margin({ left: 12 })
-        .onClick(() => {
-          this.vm.startEdit(stat.tag);
-        })
+        Text('🗑️')
+          .fontSize(16)
+          .margin({ left: 8 })
+          .onClick(() => {
+            this.vm.deleteTag(stat.tag);
+          })
+      }
+      .width('100%')
 
-      Text('🗑️')
-        .fontSize(16)
-        .margin({ left: 8 })
-        .onClick(() => {
-          this.vm.deleteTag(stat.tag);
-        })
+      // 引用计数
+      Row() {
+        if (stat.taskCount > 0) {
+          Row() {
+            Text('📋')
+              .fontSize(12)
+            Text(`${stat.taskCount} 个任务`)
+              .fontSize(12)
+              .fontColor('#FFFFFF')
+          }
+          .backgroundColor('#1677FF')
+          .borderRadius(4)
+          .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+        } else {
+          Text('暂无引用')
+            .fontSize(12)
+            .fontColor('#A6A6A6')
+        }
+      }
+      .width('100%')
+      .margin({ top: 8 })
     }
     .width('100%')
     .padding({ top: 14, bottom: 14, left: 16, right: 16 })

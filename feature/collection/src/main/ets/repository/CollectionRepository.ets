@@ -147,6 +147,56 @@ export class CollectionRepository {
     return Array.from(tags).sort();
   }
 
+  /**
+   * 重命名标签：更新所有包含 oldTag 的收藏
+   */
+  async renameTag(oldTag: string, newTag: string): Promise<void> {
+    const all = await this.queryAll();
+    const store = this.getStore();
+    const now = DateUtil.getNow();
+    for (const c of all) {
+      if (!c.tag) continue;
+      const tags = c.tag.split(',').map(s => s.trim());
+      const idx = tags.indexOf(oldTag);
+      if (idx >= 0) {
+        tags[idx] = newTag;
+        const predicates = new relationalStore.RdbPredicates(this.TABLE);
+        predicates.equalTo('id', c.id);
+        const vb: relationalStore.ValuesBucket = {
+          tag: tags.join(','),
+          syncStatus: 0,
+          updateTime: now
+        };
+        await store.update(vb, predicates);
+      }
+    }
+  }
+
+  /**
+   * 删除标签：从所有收藏中移除该标签
+   */
+  async deleteTag(tag: string): Promise<void> {
+    const all = await this.queryAll();
+    const store = this.getStore();
+    const now = DateUtil.getNow();
+    for (const c of all) {
+      if (!c.tag) continue;
+      const tags = c.tag.split(',').map(s => s.trim());
+      const idx = tags.indexOf(tag);
+      if (idx >= 0) {
+        tags.splice(idx, 1);
+        const predicates = new relationalStore.RdbPredicates(this.TABLE);
+        predicates.equalTo('id', c.id);
+        const vb: relationalStore.ValuesBucket = {
+          tag: tags.join(','),
+          syncStatus: 0,
+          updateTime: now
+        };
+        await store.update(vb, predicates);
+      }
+    }
+  }
+
   // ==================== 同步相关 ====================
 
   async queryChangedSince(sinceTime: number): Promise<Collection[]> {

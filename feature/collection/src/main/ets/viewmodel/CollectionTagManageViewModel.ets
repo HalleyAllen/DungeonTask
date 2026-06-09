@@ -1,51 +1,58 @@
 /**
- * 标签管理 ViewModel（仅任务表）
+ * 收藏标签管理 ViewModel
+ * 只处理收藏表的标签
  */
-import { TaskRepository } from '../repository/TaskRepository';
+import { CollectionRepository } from '../repository/CollectionRepository';
 
 /**
  * 标签统计
  */
-export interface TagStat {
+export interface CollectionTagStat {
   tag: string;
-  /** 任务中引用数 */
-  taskCount: number;
+  /** 收藏中引用数 */
+  count: number;
 }
 
 @ObservedV2
-export class TagManageViewModel {
-  /** 标签列表（含引用数） */
-  @Trace tagStats: TagStat[] = [];
+export class CollectionTagManageViewModel {
+  /** 标签列表 */
+  @Trace tagStats: CollectionTagStat[] = [];
   /** 是否正在编辑 */
   @Trace editingTag: string = '';
   /** 编辑中的值 */
   @Trace editValue: string = '';
   @Trace isLoading: boolean = false;
 
-  private repo: TaskRepository = new TaskRepository();
+  private repo: CollectionRepository = new CollectionRepository();
 
   /**
-   * 加载标签列表（仅任务表）
+   * 加载标签列表（仅收藏表）
    */
   async loadTags(): Promise<void> {
     this.isLoading = true;
     try {
       const countMap = new Map<string, number>();
       const all = await this.repo.queryAll();
-      for (const t of all) {
-        if (!t.tag) continue;
-        const tags = t.tag.split(',').map(s => s.trim()).filter(s => s);
+      console.log(`CollectionTagManage: queryAll returned ${all.length} items`);
+      for (const c of all) {
+        if (!c.tag) {
+          console.log(`CollectionTagManage: item id=${c.id} has no tag`);
+          continue;
+        }
+        const tags = c.tag.split(',').map(s => s.trim()).filter(s => s);
         for (const tag of tags) {
           countMap.set(tag, (countMap.get(tag) || 0) + 1);
         }
       }
-      const newStats: TagStat[] = [];
+      console.log(`CollectionTagManage: tagCount=${countMap.size}`);
+      const newStats: CollectionTagStat[] = [];
       countMap.forEach((count, tag) => {
-        newStats.push({ tag, taskCount: count });
+        newStats.push({ tag, count });
       });
       this.tagStats = newStats;
+
     } catch (e) {
-      console.error('Load tags failed:', e);
+      console.error('Load collection tags failed:', e);
       this.tagStats = [];
     } finally {
       this.isLoading = false;
@@ -103,7 +110,7 @@ export class TagManageViewModel {
     if (this.tagStats.some(s => s.tag === trimmed)) {
       return '标签已存在';
     }
-    this.tagStats = [...this.tagStats, { tag: trimmed, taskCount: 0 }];
+    this.tagStats = [...this.tagStats, { tag: trimmed, count: 0 }];
     return '';
   }
 }

@@ -4,7 +4,7 @@
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Memo } from 'core.model';
 import { DateUtil } from 'core.util';
-import { EmptyState } from 'core.ui';
+import { EmptyState, FloatingActionButton } from 'core.ui';
 import { MemoPageViewModel } from '../viewmodel/MemoPageViewModel';
 
 @HMRouter({ pageUrl: 'MemoPage' })
@@ -93,26 +93,10 @@ export struct MemoPage {
         .padding({ left: 16, right: 16 })
       }
 
-      // FAB
-      Button() {
-        Text('＋')
-          .fontSize(24)
-          .fontWeight(FontWeight.Regular)
-          .fontColor('#FFFFFF')
-      }
-      .position({ right: 24, bottom: 32 })
-      .width(48)
-      .height(48)
-      .backgroundColor('#1677FF')
-      .borderRadius(24)
-      .shadow({
-        radius: 12,
-        color: 'rgba(0, 0, 0, 0.15)',
-        offsetX: 0,
-        offsetY: 6
-      })
-      .onClick(() => {
-        HMRouterMgr.push({ pageUrl: 'MemoEdit' });
+      FloatingActionButton({
+        clickFun: () => {
+          HMRouterMgr.push({ pageUrl: 'MemoEdit' });
+        }
       })
     }
     .width('100%')

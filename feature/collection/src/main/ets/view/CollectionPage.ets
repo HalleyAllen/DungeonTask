@@ -5,7 +5,7 @@
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Collection } from 'core.model';
 import { DateUtil } from 'core.util';
-import { EmptyState } from 'core.ui';
+import { EmptyState, FloatingActionButton } from 'core.ui';
 import { CollectionPageViewModel, TypeOption } from '../viewmodel/CollectionPageViewModel';
 
 @HMRouter({ pageUrl: 'CollectionPage' })
@@ -25,6 +25,15 @@ export struct CollectionPage {
         Text('📦 收藏夹')
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
+
+        Blank()
+
+        Text('⚙')
+          .fontSize(20)
+          .fontColor('#A6A6A6')
+          .width(40)
+          .height(40)
+          .bindMenu(this.SettingsMenuBuilder)
       }
       .width('100%')
       .padding(16)
@@ -34,17 +43,38 @@ export struct CollectionPage {
       Scroll() {
         Row() {
           ForEach(this.vm.typeOptions, (option: TypeOption) => {
-            Text(option.label)
-              .fontSize(13)
-              .fontColor(this.vm.selectedType === option.value ? '#FFFFFF' : '#1F1F1F')
+            if (option.value === '') {
+              // "全部"：带下拉箭头的样式，与 TaskPage 一致
+              Row() {
+                Text(option.label)
+                  .fontSize(14)
+                  .fontColor(this.vm.selectedType === option.value ? '#FFFFFF' : '#1F1F1F')
+                  .onClick(() => {
+                    this.vm.selectedType = option.value;
+                    this.vm.loadCollections();
+                  })
+                Text('▼')
+                  .fontSize(14)
+                  .fontColor(this.vm.selectedType === option.value ? '#FFFFFF' : '#1F1F1F')
+                  .padding({ left: 8 })
+                  .bindMenu(this.TagMenuBuilder)
+              }
+              .padding({ left: 16, right: 16, top: 8, bottom: 8 })
               .backgroundColor(this.vm.selectedType === option.value ? '#1677FF' : '#F5F5F5')
-              .borderRadius(14)
-              .padding({ left: 12, right: 12, top: 6, bottom: 6 })
-              .margin({ right: 8 })
-              .onClick(() => {
-                this.vm.selectedType = option.value;
-                this.vm.loadCollections();
-              })
+              .borderRadius(16)
+            } else {
+              Text(option.label)
+                .fontSize(14)
+                .fontColor(this.vm.selectedType === option.value ? '#FFFFFF' : '#1F1F1F')
+                .backgroundColor(this.vm.selectedType === option.value ? '#1677FF' : '#F5F5F5')
+                .borderRadius(16)
+                .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+                .margin({ right: 8 })
+                .onClick(() => {
+                  this.vm.selectedType = option.value;
+                  this.vm.loadCollections();
+                })
+            }
           })
         }
         .padding({ left: 16, right: 16 })
@@ -103,6 +133,9 @@ export struct CollectionPage {
                     .borderRadius(4)
                     .padding({ left: 8, right: 8, top: 2, bottom: 2 })
                     .margin({ top: 8 })
+                    .onClick(() => {
+                      HMRouterMgr.push({ pageUrl: 'CollectionTagManage' });
+                    })
                 }
 
                 // 展开区
@@ -155,30 +188,39 @@ export struct CollectionPage {
         .padding({ left: 16, right: 16, top: 8 })
       }
 
-      // FAB
-      Button() {
-        Text('＋')
-          .fontSize(24)
-          .fontWeight(FontWeight.Regular)
-          .fontColor('#FFFFFF')
-      }
-      .position({ right: 24, bottom: 32 })
-      .width(48)
-      .height(48)
-      .backgroundColor('#1677FF')
-      .borderRadius(24)
-      .shadow({
-        radius: 12,
-        color: 'rgba(0, 0, 0, 0.15)',
-        offsetX: 0,
-        offsetY: 6
-      })
-      .onClick(() => {
-        HMRouterMgr.push({ pageUrl: 'CollectionEdit' });
+      FloatingActionButton({
+        clickFun: () => {
+          HMRouterMgr.push({ pageUrl: 'CollectionEdit' });
+        }
       })
     }
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F5F5')
+  }
+
+  @Builder
+  SettingsMenuBuilder() {
+    Menu() {
+      MenuItem({ content: '标签管理' })
+        .onClick(() => {
+          HMRouterMgr.push({ pageUrl: 'CollectionTagManage' });
+        })
+    }
+  }
+
+  @Builder
+  TagMenuBuilder() {
+    Menu() {
+      ForEach(this.vm.typeOptions, (option: TypeOption) => {
+        if (option.value !== '') {
+          MenuItem({ content: option.label })
+            .onClick(() => {
+              this.vm.selectedType = option.value;
+              this.vm.loadCollections();
+            })
+        }
+      })
+    }
   }
 }

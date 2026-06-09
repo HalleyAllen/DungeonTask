@@ -8,48 +8,48 @@ import { CollectionTypeRepository } from '../repository/CollectionTypeRepository
 import { DateUtil } from 'core.util';
 import { HMRouterMgr } from '@hadss/hmrouter';
 
-@Observed
+@ObservedV2
 export class CollectionEditViewModel {
-  types: CollectionTypeItem[] = [];
-  itemType: string = 'sentence';
-  title: string = '';
-  content: string = '';
+  @Trace types: CollectionTypeItem[] = [];
+  @Trace itemType: string = 'sentence';
+  @Trace title: string = '';
+  @Trace content: string = '';
   tag: string = '';
   // 词语扩展
-  wordPinyin: string = '';
-  wordExplanation: string = '';
+  @Trace wordPinyin: string = '';
+  @Trace wordExplanation: string = '';
   // 句子/台词扩展
-  textSource: string = '';
-  textAuthor: string = '';
+  @Trace textSource: string = '';
+  @Trace textAuthor: string = '';
   // 知识点 & 自定义类型扩展
-  customDesc: string = '';
+  @Trace customDesc: string = '';
 
-  isEdit: boolean = false;
+  @Trace isEdit: boolean = false;
   itemId: number = 0;
 
   // 新建类型弹窗
-  showAddTypeDialog: boolean = false;
-  newTypeLabel: string = '';
+  @Trace showAddTypeDialog: boolean = false;
+  @Trace newTypeLabel: string = '';
 
   // ===== 标签相关 =====
   /** 所有已用标签（去重） */
-  allTags: string[] = [];
+  @Trace allTags: string[] = [];
   /** 当前选中的标签 */
-  selectedTags: string[] = [];
+  @Trace selectedTags: string[] = [];
   /** 自定义标签输入文本 */
-  tagInput: string = '';
+  @Trace tagInput: string = '';
 
   // ===== 截至日期 =====
   /** 截至日期时间戳(ms)，0=未设置 */
-  deadline: number = 0;
+  @Trace deadline: number = 0;
   /** 截至日期展示文本 */
-  deadlineText: string = '';
+  @Trace deadlineText: string = '';
 
   // ===== 子项 =====
   /** 子项列表 */
-  subItems: CollectionSubItem[] = [];
+  @Trace subItems: CollectionSubItem[] = [];
   /** 新增子项输入文本 */
-  newSubItemText: string = '';
+  @Trace newSubItemText: string = '';
 
   private collectionRepo: CollectionRepository = new CollectionRepository();
   private typeRepo: CollectionTypeRepository = new CollectionTypeRepository();
@@ -122,10 +122,14 @@ export class CollectionEditViewModel {
    * 保存收藏
    */
   async save(): Promise<boolean> {
-    if (!this.title.trim()) return false;
+    if (!this.title.trim()) {
+      console.warn('CollectionEdit save aborted: title is empty');
+      return false;
+    }
 
     try {
       const tagStr = this.selectedTags.join(',');
+      console.info(`CollectionEdit save: title="${this.title}", type="${this.itemType}", tags="${tagStr}"`);
       if (this.isEdit) {
         const item = await this.collectionRepo.queryById(this.itemId);
         if (item) {
@@ -135,6 +139,7 @@ export class CollectionEditViewModel {
           item.extra = this.buildExtra();
           item.tag = tagStr;
           await this.collectionRepo.update(item);
+          console.info('CollectionEdit update success, id=' + item.id);
         }
       } else {
         const collection = new Collection();
@@ -145,7 +150,8 @@ export class CollectionEditViewModel {
         collection.tag = tagStr;
         collection.createTime = DateUtil.getNow();
         collection.updateTime = DateUtil.getNow();
-        await this.collectionRepo.insert(collection);
+        const newId = await this.collectionRepo.insert(collection);
+        console.info('CollectionEdit insert success, newId=' + newId);
       }
       return true;
     } catch (e) {
@@ -402,6 +408,19 @@ export class CollectionEditViewModel {
       case 'quote': return '输入台词首句或标题';
       case 'knowledge': return '输入知识点名称';
       default: return '请输入标题';
+    }
+  }
+
+  /**
+   * 获取当前类型的提示文本
+   */
+  getTypeHint(): string {
+    switch (this.itemType) {
+      case 'word': return '记录词语的拼音与释义';
+      case 'sentence': return '记录句子的出处与作者';
+      case 'quote': return '记录台词的来源与角色';
+      case 'knowledge': return '记录知识点及详细描述';
+      default: return '自定义类型，可填写描述信息';
     }
   }
 

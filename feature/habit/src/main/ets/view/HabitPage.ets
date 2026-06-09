@@ -4,7 +4,7 @@
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Habit, HabitLog } from 'core.model';
 import { DateUtil } from 'core.util';
-import { EmptyState } from 'core.ui';
+import { EmptyState, FloatingActionButton } from 'core.ui';
 import { HabitPageViewModel } from '../viewmodel/HabitPageViewModel';
 
 @HMRouter({ pageUrl: 'HabitPage' })
@@ -93,26 +93,10 @@ export struct HabitPage {
       .layoutWeight(1)
       .margin({ top: 8 })
 
-      // FAB
-      Button() {
-        Text('＋')
-          .fontSize(24)
-          .fontWeight(FontWeight.Regular)
-          .fontColor('#FFFFFF')
-      }
-      .position({ right: 24, bottom: 32 })
-      .width(48)
-      .height(48)
-      .backgroundColor('#1677FF')
-      .borderRadius(24)
-      .shadow({
-        radius: 12,
-        color: 'rgba(0, 0, 0, 0.15)',
-        offsetX: 0,
-        offsetY: 6
-      })
-      .onClick(() => {
-        HMRouterMgr.push({ pageUrl: 'HabitEdit' });
+      FloatingActionButton({
+        clickFun: () => {
+          HMRouterMgr.push({ pageUrl: 'HabitEdit' });
+        }
       })
     }
     .width('100%')

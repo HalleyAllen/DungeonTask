@@ -30,6 +30,8 @@ export class Task {
   level: number = 0;
   /** 同级排序序号 */
   sortOrder: number = 0;
+  /** 标签（逗号分隔） */
+  tag: string = '';
   /** 创建时间戳(ms) */
   createTime: number = 0;
   /** 更新时间戳(ms) */
