@@ -1,8 +1,8 @@
 # DungeonTask 功能设计文档
 
-> 版本：v1.1
+> 版本：v1.2
 > 创建日期：2026-05-19
-> 更新时间：2026-05-19
+> 更新时间：2026-06-13
 > 参考项目：CoolMallArkTS（MVVM + 模块化架构）
 > 对应需求文档：requirements.md
 
@@ -51,16 +51,22 @@ DungeonTask 是一款面向 HarmonyOS 平台的日常记录与自我管理应用
 ┌─────────────────────────────────────────────────────────────┐
 │                     entry（应用入口）                        │
 ├─────────────────────────────────────────────────────────────┤
-│                     core（核心基础设施）                      │
-│  ┌─────────┬─────────┬─────────┬─────────┬─────────┐       │
-│  │  base   │  model  │   ui    │  util   │database │       │
-│  │ (基类)  │ (数据模型)│(组件库) │(工具类) │ (数据库) │       │
-│  └─────────┴─────────┴─────────┴─────────┴─────────┘       │
+│                   common（通用公共层，跨项目可复用）            │
+│         ┌─────────┬──────────┬──────────┐                   │
+│         │  base   │    ui    │   util   │                   │
+│         │ (基类)  │ (组件库)  │ (工具类)  │                   │
+│         └─────────┴──────────┴──────────┘                   │
+├─────────────────────────────────────────────────────────────┤
+│                   core（项目特定层，DungeonTask 专属）         │
+│              ┌─────────┬──────────┬─────────┐              │
+│              │  model  │ database │  util   │              │
+│              │(数据模型)│ (数据库)  │(导出工具)│              │
+│              └─────────┴──────────┴─────────┘              │
 ├─────────────────────────────────────────────────────────────┤
 │                   feature（功能业务模块）                     │
-│  ┌────────┬────────┬────────┬────────┬────────┬────────┐  │
-│  │  task  │ fitness│ sentence│  word  │  goal  │  memo  │  │
-│  └────────┴────────┴────────┴────────┴────────┴────────┘  │
+│  ┌──────┬──────────┬──────────┬────────┬──────────┐       │
+│  │ task │ collection│  habit   │  memo  │ settings │       │
+│  └──────┴──────────┴──────────┴────────┴──────────┘       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -86,41 +92,63 @@ DungeonTask 是一款面向 HarmonyOS 平台的日常记录与自我管理应用
 ```
 DungeonTask/
 ├── AppScope/                      # 应用配置
-├── entry/                        # 应用入口模块
+├── entry/                         # 应用入口模块
 │   └── src/main/ets/
 │       ├── entryability/          # 应用入口
 │       └── MainAbility.ets        # 主Ability
-├── core/                          # 核心基础设施（HAR）
-│   ├── base/                      # 基础模块
+│
+├── common/                        # 🔄 通用公共层（HAR，跨项目可直接复制复用）
+│   ├── base/                      # 基础模块（零项目依赖）
 │   │   ├── Index.ets
 │   │   └── src/main/ets/
-│   │       └── constants/         # 常量定义
+│   │       └── BaseViewModel.ets  # ViewModel 基类
+│   ├── ui/                        # 通用 UI 组件库（零项目依赖）
+│   │   ├── Index.ets
+│   │   └── src/main/ets/
+│   │       └── components/
+│   │           ├── DatePickerModule.ets  # 日期选择器
+│   │           ├── EmptyState.ets        # 空状态占位
+│   │           ├── FloatingActionButton.ets  # 悬浮按钮
+│   │           ├── LoadingOverlay.ets    # 加载遮罩
+│   │           └── TextInputDialog.ets   # 文本输入弹窗
+│   └── util/                      # 通用工具类（零项目依赖）
+│       ├── Index.ets
+│       └── src/main/ets/
+│           └── DateUtil.ets       # 日期工具
+│
+├── core/                          # 🎯 项目特定层（DungeonTask 专属）
 │   ├── model/                     # 数据模型
 │   │   ├── Index.ets
 │   │   └── src/main/ets/
 │   │       └── entity/            # 业务实体
+│   │           ├── Task.ets       # 任务实体 + SortOrderItem
+│   │           ├── Habit.ets      # 习惯实体
+│   │           ├── HabitLog.ets   # 习惯打卡实体
+│   │           ├── Collection.ets # 收藏实体 + CollectionTypeItem/SubItem/Extra
+│   │           ├── CollectionType.ets  # 收藏类型实体
+│   │           ├── Memo.ets       # 备忘录实体
+│   │           └── ExportData.ets # 导出数据结构
 │   ├── database/                  # 数据库层
 │   │   ├── Index.ets
 │   │   └── src/main/ets/
-│   │       └── DbHelper.ets       # 数据库助手
-│   ├── ui/                        # 通用UI组件
-│   │   ├── Index.ets
-│   │   └── src/main/ets/
-│   │       └── components/        # 通用组件
-│   ├── util/                      # 工具类
-│   │   ├── Index.ets
-│   │   └── src/main/ets/
-│   │       ├── ExportUtil.ets     # 导出工具
-│   │       └── DateUtil.ets       # 日期工具
-│   └── navigation/                # 导航配置
-│       └── Index.ets
-└── feature/                       # 功能业务模块
+│   │       ├── DbHelper.ets       # 数据库助手
+│   │       └── repository/        # 数据仓库
+│   │           ├── TaskRepository.ets
+│   │           ├── HabitRepository.ets
+│   │           ├── CollectionRepository.ets
+│   │           └── MemoRepository.ets
+│   └── util/                      # 项目工具类（依赖 core.model + common.util）
+│       ├── Index.ets
+│       └── src/main/ets/
+│           ├── Constants.ets      # 项目常量（DB名、枚举值等）
+│           └── ExportUtil.ets     # 数据导入导出工具
+│
+└── feature/                       # 📱 功能业务模块
     ├── task/                      # 任务模块
-    ├── fitness/                   # 健身模块
-    ├── sentence/                  # 句子模块
-    ├── word/                      # 词语模块
-    ├── goal/                      # 目标模块
-    └── memo/                      # 备忘录模块
+    ├── habit/                     # 习惯模块
+    ├── collection/                # 收藏模块
+    ├── memo/                      # 备忘录模块
+    └── settings/                  # 设置模块
 ```
 
 ### 4.2 功能模块结构（每个模块相同）
@@ -536,7 +564,7 @@ export class MemoTable {
 
 ### 6.1 ViewModel 基类（可选）
 
-位于 `core/base/src/main/ets/`，提供通用能力：
+位于 `common/base/src/main/ets/`，提供通用能力：
 
 ```typescript
 // BaseViewModel.ets
@@ -570,7 +598,7 @@ export class BaseViewModel {
 
 ```typescript
 // feature/task/src/main/ets/viewmodel/TaskViewModel.ets
-import { BaseViewModel } from '@ohos.base';
+import { BaseViewModel } from 'common.base';
 import { TaskModel } from '../model/TaskModel';
 import { Task } from '@core/model';
 
@@ -857,7 +885,7 @@ export class DbHelper {
 ## 十、实施计划
 
 ### Phase 1: 基础设施搭建
-1. 创建 core 模块（model, database, util, base, ui）
+1. 创建 common 模块（base, ui, util）+ core 模块（model, database, util）
 2. 配置 IBest-ORM 数据库
 3. 实现基础组件库
 

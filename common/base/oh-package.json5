@@ -1,0 +1,10 @@
+{
+  "name": "common.base",
+  "version": "1.0.0",
+  "description": "Common base classes and interfaces.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+  }
+}

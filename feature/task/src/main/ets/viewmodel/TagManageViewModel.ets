@@ -1,7 +1,8 @@
-/**
+﻿/**
  * 标签管理 ViewModel（仅任务表）
  */
-import { TaskRepository } from '../repository/TaskRepository';
+import { Task } from 'core.model';
+import { TaskRepository, TagRepository } from 'core.database';
 
 /**
  * 标签统计
@@ -22,16 +23,18 @@ export class TagManageViewModel {
   @Trace editValue: string = '';
   @Trace isLoading: boolean = false;
 
-  private repo: TaskRepository = new TaskRepository();
+  private taskRepo: TaskRepository = new TaskRepository();
+  private tagRepo: TagRepository = new TagRepository();
 
   /**
-   * 加载标签列表（仅任务表）
+   * 加载标签列表（Tag 表 + 任务表中的引用计数）
    */
   async loadTags(): Promise<void> {
     this.isLoading = true;
     try {
+      // 1. 从任务表统计各标签引用数
       const countMap = new Map<string, number>();
-      const all = await this.repo.queryAll();
+      const all = await this.taskRepo.queryAll();
       for (const t of all) {
         if (!t.tag) continue;
         const tags = t.tag.split(',').map(s => s.trim()).filter(s => s);
@@ -39,10 +42,17 @@ export class TagManageViewModel {
           countMap.set(tag, (countMap.get(tag) || 0) + 1);
         }
       }
+
+      // 2. 从 Tag 表加载已持久化的标签名，合并计数
+      const persistedNames = await this.tagRepo.queryAllNames();
+      const tagSet = new Set<string>(persistedNames);
+      countMap.forEach((_, tag) => tagSet.add(tag));
+
       const newStats: TagStat[] = [];
-      countMap.forEach((count, tag) => {
-        newStats.push({ tag, taskCount: count });
+      tagSet.forEach(tag => {
+        newStats.push({ tag, taskCount: countMap.get(tag) || 0 });
       });
+
       this.tagStats = newStats;
     } catch (e) {
       console.error('Load tags failed:', e);

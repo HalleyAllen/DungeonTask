@@ -1,9 +1,9 @@
-/**
+﻿/**
  * 任务列表 ViewModel
  */
 import { Task, SortOrderItem } from 'core.model';
-import { TaskRepository } from '../repository/TaskRepository';
-import { DateUtil } from 'core.util';
+import { TaskRepository } from 'core.database';
+import { DateUtil } from 'common.util';
 import { HMRouterMgr } from '@hadss/hmrouter';
 
 
@@ -210,7 +210,7 @@ export class TaskViewModel {
    */
   async finishReorder(): Promise<void> {
     const count = this.dragList.length;
-    for (let i = 0; i < count; i++) {
+    for (let i: number = 0; i < count; i++) {
       this.dragList[i].priority = count - i;
     }
     await this.saveOrder(this.dragList);

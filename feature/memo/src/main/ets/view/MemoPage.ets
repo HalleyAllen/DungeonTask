@@ -1,10 +1,10 @@
-/**
+﻿/**
  * 备忘录列表页
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Memo } from 'core.model';
-import { DateUtil } from 'core.util';
-import { EmptyState, FloatingActionButton } from 'core.ui';
+import { DateUtil } from 'common.util';
+import { EmptyState, FloatingActionButton } from 'common.ui';
 import { MemoPageViewModel } from '../viewmodel/MemoPageViewModel';
 
 @HMRouter({ pageUrl: 'MemoPage' })

@@ -1,10 +1,10 @@
-/**
+﻿/**
  * 任务列表页
  */
 import { HMRouter } from '@hadss/hmrouter';
 import { Task } from 'core.model';
 import { TaskViewModel } from '../viewmodel/TaskViewModel';
-import { EmptyState, FloatingActionButton } from 'core.ui';
+import { EmptyState, FloatingActionButton } from 'common.ui';
 
 @HMRouter({ pageUrl: 'TaskPage' })
 @Component

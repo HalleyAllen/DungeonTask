@@ -1,11 +1,17 @@
-/**
+﻿/**
  * 收藏编辑 ViewModel
  * 管理收藏编辑页的状态和业务逻辑
  */
-import { Collection, CollectionTypeItem, CollectionExtra, CollectionSubItem, EditPageParams } from 'core.model';
-import { CollectionRepository } from '../repository/CollectionRepository';
-import { CollectionTypeRepository } from '../repository/CollectionTypeRepository';
-import { DateUtil } from 'core.util';
+import {
+  Collection,
+  CollectionExtra,
+  CollectionSubItem,
+  CollectionType,
+  CollectionTypeItem,
+  EditPageParams
+} from 'core.model';
+import { CollectionRepository, CollectionTypeRepository } from 'core.database';
+import { DateUtil } from 'common.util';
 import { HMRouterMgr } from '@hadss/hmrouter';
 
 @ObservedV2
@@ -23,14 +29,11 @@ export class CollectionEditViewModel {
   @Trace textAuthor: string = '';
   // 知识点 & 自定义类型扩展
   @Trace customDesc: string = '';
-
   @Trace isEdit: boolean = false;
   itemId: number = 0;
-
   // 新建类型弹窗
   @Trace showAddTypeDialog: boolean = false;
   @Trace newTypeLabel: string = '';
-
   // ===== 标签相关 =====
   /** 所有已用标签（去重） */
   @Trace allTags: string[] = [];
@@ -38,19 +41,16 @@ export class CollectionEditViewModel {
   @Trace selectedTags: string[] = [];
   /** 自定义标签输入文本 */
   @Trace tagInput: string = '';
-
   // ===== 截至日期 =====
   /** 截至日期时间戳(ms)，0=未设置 */
   @Trace deadline: number = 0;
   /** 截至日期展示文本 */
   @Trace deadlineText: string = '';
-
   // ===== 子项 =====
   /** 子项列表 */
   @Trace subItems: CollectionSubItem[] = [];
   /** 新增子项输入文本 */
   @Trace newSubItemText: string = '';
-
   private collectionRepo: CollectionRepository = new CollectionRepository();
   private typeRepo: CollectionTypeRepository = new CollectionTypeRepository();
 
@@ -72,15 +72,15 @@ export class CollectionEditViewModel {
    */
   async loadTypes(): Promise<void> {
     try {
-      const typeList = await this.typeRepo.queryAll();
+      const typeList: CollectionType[] = await this.typeRepo.findAll();
       const list: CollectionTypeItem[] = [];
-      for (let i = 0; i < typeList.length; i++) {
-        const t = typeList[i];
+      for (let i: number = 0; i < typeList.length; i++) {
+        const t: CollectionType = typeList[i];
         list.push({
           label: t.label,
           value: t.name,
           isBuiltIn: t.isBuiltIn
-        });
+        } as CollectionTypeItem);
       }
       this.types = list;
     } catch (e) {
@@ -104,7 +104,7 @@ export class CollectionEditViewModel {
    */
   async loadItem(): Promise<void> {
     try {
-      const item = await this.collectionRepo.queryById(this.itemId);
+      const item: Collection | null = await this.collectionRepo.findById(this.itemId);
       if (item) {
         this.itemType = item.type;
         this.title = item.title;
@@ -131,7 +131,7 @@ export class CollectionEditViewModel {
       const tagStr = this.selectedTags.join(',');
       console.info(`CollectionEdit save: title="${this.title}", type="${this.itemType}", tags="${tagStr}"`);
       if (this.isEdit) {
-        const item = await this.collectionRepo.queryById(this.itemId);
+        const item: Collection | null = await this.collectionRepo.findById(this.itemId);
         if (item) {
           item.type = this.itemType;
           item.title = this.title;
@@ -188,7 +188,9 @@ export class CollectionEditViewModel {
    */
   addCustomTag(): void {
     const tag = this.tagInput.trim();
-    if (!tag) return;
+    if (!tag) {
+      return;
+    }
     // 去重
     if (this.selectedTags.indexOf(tag) < 0) {
       this.selectedTags.push(tag);
@@ -241,8 +243,10 @@ export class CollectionEditViewModel {
    */
   addSubItem(): void {
     const text = this.newSubItemText.trim();
-    if (!text) return;
-    this.subItems.push({ text, completed: false });
+    if (!text) {
+      return;
+    }
+    this.subItems.push({ text, completed: false } as CollectionSubItem);
     this.subItems = [...this.subItems];
     this.newSubItemText = '';
   }
@@ -282,7 +286,9 @@ export class CollectionEditViewModel {
    */
   async createNewType(): Promise<void> {
     const label = this.newTypeLabel.trim();
-    if (!label) return;
+    if (!label) {
+      return;
+    }
 
     try {
       const result = await this.typeRepo.createCustom(label);
@@ -324,6 +330,73 @@ export class CollectionEditViewModel {
   }
 
   /**
+   * 当前选中的类型是否内置
+   */
+  isCurrentBuiltIn(): boolean {
+    for (let i: number = 0; i < this.types.length; i++) {
+      const t = this.types[i];
+      if (t.value === this.itemType) {
+        return t.isBuiltIn === 1;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 获取标题占位文本
+   */
+  getTitlePlaceholder(): string {
+    switch (this.itemType) {
+      case 'word':
+        return '请输入词语';
+      case 'sentence':
+        return '输入句子首句或标题';
+      case 'quote':
+        return '输入台词首句或标题';
+      case 'knowledge':
+        return '输入知识点名称';
+      default:
+        return '请输入标题';
+    }
+  }
+
+  /**
+   * 获取当前类型的提示文本
+   */
+  getTypeHint(): string {
+    switch (this.itemType) {
+      case 'word':
+        return '记录词语的拼音与释义';
+      case 'sentence':
+        return '记录句子的出处与作者';
+      case 'quote':
+        return '记录台词的来源与角色';
+      case 'knowledge':
+        return '记录知识点及详细描述';
+      default:
+        return '自定义类型，可填写描述信息';
+    }
+  }
+
+  /**
+   * 获取内容占位文本
+   */
+  getContentPlaceholder(): string {
+    switch (this.itemType) {
+      case 'word':
+        return '可填入完整释义或备注';
+      case 'sentence':
+        return '请输入完整句子';
+      case 'quote':
+        return '请输入完整台词';
+      case 'knowledge':
+        return '请输入知识点详细内容';
+      default:
+        return '请输入内容';
+    }
+  }
+
+  /**
    * 解析 extra JSON 字段
    */
   private parseExtra(extra: string): void {
@@ -341,7 +414,7 @@ export class CollectionEditViewModel {
       // subItems
       if (obj.subItems && Array.isArray(obj.subItems)) {
         this.subItems = obj.subItems.map((s: CollectionSubItem): CollectionSubItem => {
-          return { text: s.text || '', completed: s.completed || false };
+          return { text: s.text || '', completed: s.completed || false } as CollectionSubItem;
         });
       }
     } catch {
@@ -353,13 +426,13 @@ export class CollectionEditViewModel {
    * 构建 extra JSON 字符串
    */
   private buildExtra(): string {
-    let base: CollectionExtra = {};
+    let base: CollectionExtra = new CollectionExtra();
     switch (this.itemType) {
       case 'word':
         base = {
           pinyin: this.wordPinyin,
           explanation: this.wordExplanation
-        };
+        } as CollectionExtra;
         break;
       case 'sentence':
       case 'quote':
@@ -383,57 +456,5 @@ export class CollectionEditViewModel {
       base.subItems = this.subItems;
     }
     return JSON.stringify(base);
-  }
-
-  /**
-   * 当前选中的类型是否内置
-   */
-  isCurrentBuiltIn(): boolean {
-    for (let i = 0; i < this.types.length; i++) {
-      const t = this.types[i];
-      if (t.value === this.itemType) {
-        return t.isBuiltIn === 1;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * 获取标题占位文本
-   */
-  getTitlePlaceholder(): string {
-    switch (this.itemType) {
-      case 'word': return '请输入词语';
-      case 'sentence': return '输入句子首句或标题';
-      case 'quote': return '输入台词首句或标题';
-      case 'knowledge': return '输入知识点名称';
-      default: return '请输入标题';
-    }
-  }
-
-  /**
-   * 获取当前类型的提示文本
-   */
-  getTypeHint(): string {
-    switch (this.itemType) {
-      case 'word': return '记录词语的拼音与释义';
-      case 'sentence': return '记录句子的出处与作者';
-      case 'quote': return '记录台词的来源与角色';
-      case 'knowledge': return '记录知识点及详细描述';
-      default: return '自定义类型，可填写描述信息';
-    }
-  }
-
-  /**
-   * 获取内容占位文本
-   */
-  getContentPlaceholder(): string {
-    switch (this.itemType) {
-      case 'word': return '可填入完整释义或备注';
-      case 'sentence': return '请输入完整句子';
-      case 'quote': return '请输入完整台词';
-      case 'knowledge': return '请输入知识点详细内容';
-      default: return '请输入内容';
-    }
   }
 }

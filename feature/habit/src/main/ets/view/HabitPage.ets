@@ -1,10 +1,10 @@
-/**
+﻿/**
  * 习惯管理列表页（通用抽象：健身房/阅读/冥想… + 结构化打卡）
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Habit, HabitLog } from 'core.model';
-import { DateUtil } from 'core.util';
-import { EmptyState, FloatingActionButton } from 'core.ui';
+import { DateUtil } from 'common.util';
+import { EmptyState, FloatingActionButton } from 'common.ui';
 import { HabitPageViewModel } from '../viewmodel/HabitPageViewModel';
 
 @HMRouter({ pageUrl: 'HabitPage' })

@@ -8,8 +8,8 @@
   "dependencies": {
     "core.model": "file:../../core/model",
     "core.database": "file:../../core/database",
-    "core.ui": "file:../../core/ui",
     "core.util": "file:../../core/util",
-//    "@hadss/hmrouter": "^1.2.0-rc.0"
+    "common.ui": "file:../../common/ui",
+    "common.util": "file:../../common/util"
   }
 }

@@ -1,11 +1,11 @@
-/**
+﻿/**
  * 收藏列表页（统一抽象）
  * 支持按类型筛选：内置类型 + 用户自定义类型
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { Collection } from 'core.model';
-import { DateUtil } from 'core.util';
-import { EmptyState, FloatingActionButton } from 'core.ui';
+import { DateUtil } from 'common.util';
+import { EmptyState, FloatingActionButton } from 'common.ui';
 import { CollectionPageViewModel, TypeOption } from '../viewmodel/CollectionPageViewModel';
 
 @HMRouter({ pageUrl: 'CollectionPage' })

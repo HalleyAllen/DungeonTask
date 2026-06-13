@@ -1,52 +1,55 @@
+﻿import { Column, ColumnType, PrimaryKey, Table } from '@ibestservices/ibest-orm';
+
 /**
- * 收集实体类（统一抽象）
- * 统一管理句子、词语、台词、知识点等碎片收藏
+ * 收藏实体
  */
+@Table({ name: 'collection' })
 export class Collection {
-  /** 自增主键 */
+  @PrimaryKey({ autoIncrement: true })
   id: number = 0;
-  /** 类型标识，关联 collection_type.name */
+  @Column({ type: ColumnType.TEXT, notNull: true })
   type: string = '';
-  /** 标题（词语名 / 句子首句） */
+  @Column({ type: ColumnType.TEXT, notNull: true })
   title: string = '';
-  /** 主体内容（全文 / 释义…） */
+  @Column({ type: ColumnType.TEXT })
   content: string = '';
-  /** 扩展字段 JSON（拼音、出处等类型特有信息） */
+  @Column({ type: ColumnType.TEXT })
   extra: string = '';
-  /** 标签（逗号分隔） */
+  @Column({ type: ColumnType.TEXT })
   tag: string = '';
-  /** 创建时间戳(ms) */
-  createTime: number = 0;
-  /** 更新时间戳(ms) */
-  updateTime: number = 0;
-  /** 同步：写入设备标识 */
+  @Column({ type: ColumnType.TEXT, defaultValue: '' })
   deviceId: string = '';
-  /** 同步：0=未同步 1=已同步 */
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   syncStatus: number = 0;
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  createTime: number = 0;
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  updateTime: number = 0;
 }
 
-/** 收藏类型选项（用于UI展示） */
-export interface CollectionTypeItem {
-  label: string;
-  value: string;
-  isBuiltIn: number;
+/** 收藏类型展示项 */
+export class CollectionTypeItem {
+  label: string = "";
+  value: string = "";
+  isBuiltIn: number = 0;
 }
+;
 
-/** 子项 */
-export interface CollectionSubItem {
-  text: string;
-  completed: boolean;
+/** 收藏子项 */
+export class CollectionSubItem {
+  text: string = "";
+  completed: boolean = false;
 }
+;
 
-/** 收藏扩展数据（extra字段JSON结构） */
-export interface CollectionExtra {
+/** 收藏扩展字段 */
+export class CollectionExtra {
   pinyin?: string;
   explanation?: string;
   source?: string;
   author?: string;
   desc?: string;
-  /** 截至日期时间戳(ms) */
   deadline?: number;
-  /** 子项清单 */
   subItems?: CollectionSubItem[];
 }
+;

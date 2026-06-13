@@ -1,10 +1,10 @@
-/**
+﻿/**
  * 任务编辑 ViewModel
  * 管理任务编辑页的状态和业务逻辑
  */
 import { Task, EditPageParams } from 'core.model';
-import { TaskRepository } from '../repository/TaskRepository';
-import { DateUtil } from 'core.util';
+import { TaskRepository } from 'core.database';
+import { DateUtil } from 'common.util';
 
 @Observed
 export class TaskEditViewModel {
@@ -28,7 +28,7 @@ export class TaskEditViewModel {
   }
 
   async loadTask(): Promise<void> {
-    const task = await this.repo.queryById(this.taskId);
+    const task: Task | null = await this.repo.queryById(this.taskId);
     if (task) {
       this.title = task.title;
       this.content = task.content;
@@ -41,7 +41,7 @@ export class TaskEditViewModel {
 
     try {
       if (this.isEdit) {
-        const task = await this.repo.queryById(this.taskId);
+        const task: Task | null = await this.repo.queryById(this.taskId);
         if (task) {
           task.title = this.title;
           task.content = this.content;

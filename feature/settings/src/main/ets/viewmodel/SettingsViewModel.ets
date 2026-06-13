@@ -1,114 +1,110 @@
-/**
- * 设置页 ViewModel
- * 管理设置页状态和业务逻辑
- */
-import { ExportUtil } from 'core.util';
-import { DbHelper } from 'core.database';
-import { systemDateTime } from '@kit.BasicServicesKit';
+﻿import { ExportUtil } from 'core.util';
+import { getORM } from '@ibestservices/ibest-orm';
+import { Task, Habit, HabitLog, Collection, Memo, ExportData } from 'core.model';
+import { util } from '@kit.ArkTS';
 
-@Observed
+/** 设置项 */
+export interface SettingsItem {
+  label: string;
+  type: 'nav' | 'action' | 'info' | 'danger';
+  actionId: string;
+}
+
+/** 设置分组 */
+export interface SettingsSection {
+  title: string;
+  items: SettingsItem[];
+}
+
 export class SettingsViewModel {
-  /** 当前 app 版本 */
-  appVersion: string = '1.0.0';
-  /** 数据导出中状态 */
-  exporting: boolean = false;
-  /** 同步码 */
   syncCode: string = '';
-  /** 同步中 */
-  syncing: boolean = false;
+  exporting: boolean = false;
 
-  /**
-   * 导出全部数据
-   */
-  async exportData(context: Context): Promise<void> {
-    if (this.exporting) return;
-    this.exporting = true;
-    try {
-      await ExportUtil.exportAll(context);
-    } catch (e) {
-      console.error('Export failed:', e);
-    }
-    this.exporting = false;
-  }
-
-  /**
-   * 生成同步码
-   */
+  /** 生成同步码（将全部数据编码为 base64） */
   generateSyncCode(): void {
-    const now = systemDateTime.getTime();
-    const random = Math.floor(Math.random() * 9000) + 1000;
-    this.syncCode = `DT-${now}-${random}`;
+    try {
+      this.syncCode = '';
+      this.buildSyncCode().then((code: string) => {
+        this.syncCode = code;
+      });
+    } catch (e) {
+      console.error('Generate sync code failed:', e);
+    }
   }
 
-  /**
-   * 通过同步码导入数据
-   */
+  /** 通过同步码导入数据 */
   async importBySyncCode(context: Context, code: string): Promise<boolean> {
-    if (this.syncing) return false;
-    this.syncing = true;
     try {
-      // TODO: 实际通过同步码从远端获取数据，当前使用本地导入作为占位
+      const base64Helper = new util.Base64Helper();
+      const decoded: Uint8Array = base64Helper.decodeSync(code);
+      const decoder = new util.TextDecoder('utf-8');
+      const jsonStr: string = decoder.decodeWithStream(decoded);
+      const exportData: ExportData = JSON.parse(jsonStr);
+      await this.restoreFromExport(exportData);
       return true;
     } catch (e) {
-      console.error('Sync import failed:', e);
+      console.error('Import by sync code failed:', e);
       return false;
-    } finally {
-      this.syncing = false;
     }
   }
 
-  /**
-   * 清除所有数据
-   */
   async clearAllData(context: Context): Promise<void> {
     try {
-      const dbHelper = DbHelper.getInstance();
-      const store = dbHelper.getRdbStore();
-      const tables = ['task', 'habit', 'habit_log', 'collection', 'memo'];
-      for (const table of tables) {
-        store.executeSql(`DELETE FROM ${table}`);
-      }
+      const orm = getORM();
+      await orm.query(Task).delete();
+      await orm.query(Habit).delete();
+      await orm.query(HabitLog).delete();
+      await orm.query(Collection).delete();
+      await orm.query(Memo).delete();
     } catch (e) {
       console.error('Clear data failed:', e);
     }
   }
 
-  /**
-   * 获取数据统计摘要（各模块记录数）
-   */
-  getDataSummary(): DataSummaryItem[] {
-    // TODO: 后续接入各模块的实际统计
-    return [
-      { label: '任务', count: '--' },
-      { label: '习惯', count: '--' },
-      { label: '收藏', count: '--' },
-      { label: '备忘', count: '--' }
-    ];
+  async exportData(context: Context): Promise<boolean> {
+    this.exporting = true;
+    try {
+      const result = await ExportUtil.exportData(context);
+      return result;
+    } finally {
+      this.exporting = false;
+    }
   }
 
-  /**
-   * 设置列表项配置
-   */
+  async importData(context: Context): Promise<boolean> {
+    return ExportUtil.importData(context);
+  }
+
+  getAppVersion(): string {
+    return '1.0.0';
+  }
+
+  /** 构建设置菜单 */
   getSettingsSections(): SettingsSection[] {
     return [
       {
-        title: '同步与共享',
+        title: '页面管理',
+        items: [
+          { label: '首页模块管理', type: 'nav', actionId: 'page_manage' }
+        ]
+      },
+      {
+        title: '数据同步',
         items: [
           { label: '生成同步码', type: 'action', actionId: 'sync_generate' },
-          { label: '通过同步码导入', type: 'action', actionId: 'sync_import' }
+          { label: '输入同步码导入', type: 'action', actionId: 'sync_import' }
         ]
       },
       {
         title: '数据管理',
         items: [
-          { label: '页面管理', type: 'nav', actionId: 'page_manage' },
-          { label: '导出全部数据', type: 'action', actionId: 'export' },
-          { label: '导入数据', type: 'action', actionId: 'import' },
+          { label: '导出数据到文件', type: 'action', actionId: 'export' },
+          { label: '从文件导入数据', type: 'action', actionId: 'import' },
           { label: '清除所有数据', type: 'danger', actionId: 'clear' }
         ]
       },
       {
-        title: '开发调试',
+        title: '开发',
         items: [
           { label: '测试页面', type: 'nav', actionId: 'test_page' }
         ]
@@ -116,35 +112,52 @@ export class SettingsViewModel {
       {
         title: '关于',
         items: [
-          { label: `版本 ${this.appVersion}`, type: 'info' },
-          { label: '开源许可', type: 'nav' }
+          { label: `版本 ${this.getAppVersion()}`, type: 'info', actionId: 'version' }
         ]
       }
     ];
   }
+
+  /** 构建同步码 */
+  private async buildSyncCode(): Promise<string> {
+    const orm = getORM();
+    const exportData: ExportData = {
+      version: '1.0',
+      exportTime: new Date().toISOString(),
+      appName: 'DungeonTask',
+      data: {
+        tasks: await orm.query(Task).find() as Task[],
+        habits: await orm.query(Habit).find() as Habit[],
+        habitLogs: await orm.query(HabitLog).find() as HabitLog[],
+        collections: await orm.query(Collection).find() as Collection[],
+        memos: await orm.query(Memo).find() as Memo[]
+      }
+    };
+    const jsonStr = JSON.stringify(exportData);
+    const encoder = new util.TextEncoder();
+    const uint8Arr = encoder.encodeInto(jsonStr);
+    const base64Helper = new util.Base64Helper();
+    const base64Str = base64Helper.encodeToStringSync(uint8Arr);
+    return base64Str;
+  }
+
+  /** 从导出数据恢复 */
+  private async restoreFromExport(exportData: ExportData): Promise<void> {
+    const orm = getORM();
+    // 清空现有数据
+    await orm.query(Task).delete();
+    await orm.query(Habit).delete();
+    await orm.query(HabitLog).delete();
+    await orm.query(Collection).delete();
+    await orm.query(Memo).delete();
+    // 恢复数据
+    const data = exportData.data;
+    await orm.insert(data.tasks);
+    await orm.insert(data.habits);
+    await orm.insert(data.habitLogs);
+    await orm.insert(data.collections);
+    await orm.insert(data.memos);
+  }
 }
 
-/**
- * 数据摘要项
- */
-export interface DataSummaryItem {
-  label: string;
-  count: string;
-}
-
-/**
- * 设置区域
- */
-export interface SettingsSection {
-  title: string;
-  items: SettingsItem[];
-}
-
-/**
- * 设置项
- */
-export interface SettingsItem {
-  label: string;
-  type: 'action' | 'nav' | 'info' | 'danger';
-  actionId?: string;
-}
+export default new SettingsViewModel();

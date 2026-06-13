@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试页面 - bindMenu 官方示例
  */
 import { HMRouter } from '@hadss/hmrouter';

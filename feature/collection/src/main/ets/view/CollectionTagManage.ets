@@ -1,8 +1,8 @@
-/**
+﻿/**
  * 收藏标签管理页面
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
-import { EmptyState, TextInputDialog } from 'core.ui';
+import { EmptyState, TextInputDialog } from 'common.ui';
 import { CollectionTagManageViewModel, CollectionTagStat } from '../viewmodel/CollectionTagManageViewModel';
 
 @HMRouter({ pageUrl: 'CollectionTagManage' })

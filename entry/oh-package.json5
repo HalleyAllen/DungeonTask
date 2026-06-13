@@ -9,8 +9,6 @@
     "core.model": "file:../core/model",
     "core.database": "file:../core/database",
     "core.util": "file:../core/util",
-    "core.base": "file:../core/base",
-    "core.ui": "file:../core/ui",
     "feature.task": "file:../feature/task",
     "feature.habit": "file:../feature/habit",
     "feature.collection": "file:../feature/collection",

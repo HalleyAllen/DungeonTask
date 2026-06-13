@@ -1,10 +1,9 @@
-/**
+﻿/**
  * 收藏列表页 ViewModel
  * 管理收藏列表数据加载、类型筛选、展开/删除等业务逻辑
  */
-import { Collection } from 'core.model';
-import { CollectionRepository } from '../repository/CollectionRepository';
-import { CollectionTypeRepository } from '../repository/CollectionTypeRepository';
+import { Collection, CollectionType } from 'core.model';
+import { CollectionRepository, CollectionTypeRepository } from 'core.database';
 
 /** 类型筛选配置 */
 export interface TypeOption {
@@ -24,12 +23,12 @@ export class CollectionPageViewModel {
 
   async loadTypes(): Promise<void> {
     try {
-      const typeList = await this.typeRepo.queryAll();
+      const typeList: CollectionType[] = await this.typeRepo.findAll();
       const list: TypeOption[] = [
         { label: '全部', value: '' }
       ];
-      for (let i = 0; i < typeList.length; i++) {
-        const t = typeList[i];
+      for (let i: number = 0; i < typeList.length; i++) {
+        const t: CollectionType = typeList[i];
         list.push({
           label: t.label,
           value: t.name,
@@ -44,9 +43,9 @@ export class CollectionPageViewModel {
   async loadCollections(): Promise<void> {
     try {
       if (this.selectedType) {
-        this.collections = await this.collectionRepo.queryByType(this.selectedType);
+        this.collections = await this.collectionRepo.findByType(this.selectedType);
       } else {
-        this.collections = await this.collectionRepo.queryAll();
+        this.collections = await this.collectionRepo.findAll();
       }
     } catch (e) {
       console.error('Load collections failed:', e);
@@ -55,7 +54,7 @@ export class CollectionPageViewModel {
 
   async deleteCollection(id: number): Promise<void> {
     try {
-      await this.collectionRepo.delete(id);
+      await this.collectionRepo.deleteById(id);
       await this.loadCollections();
     } catch (e) {
       console.error('Delete collection failed:', e);
@@ -64,7 +63,7 @@ export class CollectionPageViewModel {
 
   /** 根据 type name 获取显示标签 */
   getTypeLabel(type: string): string {
-    for (let i = 0; i < this.typeOptions.length; i++) {
+    for (let i: number = 0; i < this.typeOptions.length; i++) {
       if (this.typeOptions[i].value === type) {
         return this.typeOptions[i].label;
       }

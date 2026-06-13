@@ -1,8 +1,9 @@
-/**
+﻿/**
  * 收藏标签管理 ViewModel
  * 只处理收藏表的标签
  */
-import { CollectionRepository } from '../repository/CollectionRepository';
+import { Collection } from 'core.model';
+import { CollectionRepository } from 'core.database';
 
 /**
  * 标签统计
@@ -32,7 +33,7 @@ export class CollectionTagManageViewModel {
     this.isLoading = true;
     try {
       const countMap = new Map<string, number>();
-      const all = await this.repo.queryAll();
+      const all = await this.repo.findAll();
       console.log(`CollectionTagManage: queryAll returned ${all.length} items`);
       for (const c of all) {
         if (!c.tag) {

@@ -1,11 +1,11 @@
-/**
+﻿/**
  * 收藏编辑页（统一抽象）
  * 内置类型 + 用户自定义类型
  * 内置类型显示专属扩展字段，自定义类型使用通用描述字段
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { CollectionTypeItem, CollectionSubItem, EditPageParams } from 'core.model';
-import { DatePickerModule } from 'core.ui';
+import { DatePickerModule } from 'common.ui';
 import { CollectionEditViewModel } from '../viewmodel/CollectionEditViewModel';
 
 @HMRouter({ pageUrl: 'CollectionEdit' })

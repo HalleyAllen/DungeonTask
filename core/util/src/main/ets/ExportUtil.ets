@@ -1,133 +1,120 @@
-/**
- * 数据导出工具类
- */
+﻿import { util } from '@kit.ArkTS';
 import picker from '@ohos.file.picker';
 import { fileIo as fs } from '@kit.CoreFileKit';
-import { relationalStore } from '@kit.ArkData';
-import { DbHelper } from 'core.database';
-import { Task, Habit, HabitLog, Collection, Memo, ExportData, ExportDataContent } from 'core.model';
-import { DateUtil } from './DateUtil';
-import { Constants } from './Constants';
+import { getORM } from '@ibestservices/ibest-orm';
+import { Task, Habit, HabitLog, Collection, Memo, ExportData } from 'core.model';
+import { DateUtil } from 'common.util';
 
 export class ExportUtil {
-  /**
-   * 导出所有数据
-   */
-  static async exportAll(context: Context): Promise<string> {
-    const dataContent: ExportDataContent = {
-      tasks: await ExportUtil.queryAll<Task>('task'),
-      habits: await ExportUtil.queryAll<Habit>('habit'),
-      habitLogs: await ExportUtil.queryAll<HabitLog>('habit_log'),
-      collections: await ExportUtil.queryAll<Collection>('collection'),
-      memos: await ExportUtil.queryAll<Memo>('memo')
-    };
-    const data: ExportData = {
-      exportTime: new Date().toISOString(),
-      version: '1.0',
-      appName: 'DungeonTask',
-      data: dataContent
-    };
+  private static readonly EXPORT_FILENAME: string = 'DungeonTask_Backup.txt';
 
-    const jsonStr = JSON.stringify(data, null, 2);
-    const fileName = `${Constants.EXPORT_FILE_PREFIX}${DateUtil.getToday()}${Constants.EXPORT_FILE_SUFFIX}`;
-    
-    await ExportUtil.saveToFile(context, fileName, jsonStr);
-    return fileName;
+  static async exportData(context: Context): Promise<boolean> {
+    try {
+      const docsDir = context.filesDir;
+      const filePath = `${docsDir}/${ExportUtil.EXPORT_FILENAME}`;
+
+      const exportData = await ExportUtil.buildExportData();
+      const jsonStr = JSON.stringify(exportData, null, 2);
+
+      const file = fs.openSync(filePath, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY | fs.OpenMode.TRUNC);
+      fs.writeSync(file.fd, jsonStr);
+      fs.closeSync(file);
+
+      const documentSaveOptions = new picker.DocumentSaveOptions();
+      documentSaveOptions.newFileNames = [ExportUtil.EXPORT_FILENAME];
+      const documentViewPicker = new picker.DocumentViewPicker();
+      await documentViewPicker.save(documentSaveOptions);
+
+      return true;
+    } catch (e) {
+      console.error('Export data failed:', e);
+      return false;
+    }
   }
 
-  /**
-   * 导出单个模块数据
-   */
-  static async exportModule(context: Context, moduleName: string): Promise<string> {
-    const tableName: string = ExportUtil.getTableName(moduleName);
+  static async importData(context: Context): Promise<boolean> {
+    try {
+      const documentSelectOptions = new picker.DocumentSelectOptions();
+      const documentViewPicker = new picker.DocumentViewPicker();
+      const uris = await documentViewPicker.select(documentSelectOptions);
 
-    const data: Object[] = await ExportUtil.queryAll(tableName);
-    const exportDataContent: ExportDataContent = {
-      tasks: moduleName === 'task' ? data as Task[] : [],
-      habits: moduleName === 'habit' ? data as Habit[] : [],
-      habitLogs: moduleName === 'habit' ? [] : [],
-      collections: moduleName === 'collection' ? data as Collection[] : [],
-      memos: moduleName === 'memo' ? data as Memo[] : []
-    };
+      if (uris.length === 0) {
+        return false;
+      }
+
+      const file = fs.openSync(uris[0], fs.OpenMode.READ_ONLY);
+      const stat = fs.statSync(file.fd);
+      const buf = new ArrayBuffer(stat.size);
+      fs.readSync(file.fd, buf);
+      fs.closeSync(file);
+
+      const decoder = new util.TextDecoder('utf-8');
+      const content = decoder.decodeWithStream(new Uint8Array(buf));
+      const exportData = JSON.parse(content) as ExportData;
+
+      await ExportUtil.restoreData(exportData);
+      return true;
+    } catch (e) {
+      console.error('Import data failed:', e);
+      return false;
+    }
+  }
+
+  private static async buildExportData(): Promise<ExportData> {
+    const orm = getORM();
     const exportData: ExportData = {
-      exportTime: new Date().toISOString(),
       version: '1.0',
+      exportTime: DateUtil.formatDate(new Date()),
       appName: 'DungeonTask',
-      data: exportDataContent
+      data: {
+        tasks: await orm.query(Task).find() as Task[],
+        habits: await orm.query(Habit).find() as Habit[],
+        habitLogs: await orm.query(HabitLog).find() as HabitLog[],
+        collections: await orm.query(Collection).find() as Collection[],
+        memos: await orm.query(Memo).find() as Memo[]
+      }
     };
-
-    const jsonStr = JSON.stringify(exportData, null, 2);
-    const fileName = `dungeontask_${moduleName}_${DateUtil.getToday()}.json`;
-    
-    await ExportUtil.saveToFile(context, fileName, jsonStr);
-    return fileName;
+    return exportData;
   }
 
-  /**
-   * 模块名映射表名
-   */
-  private static getTableName(moduleName: string): string {
-    if (moduleName === 'task') {
-      return 'task';
-    } else if (moduleName === 'habit') {
-      return 'habit';
-    } else if (moduleName === 'collection') {
-      return 'collection';
-    } else if (moduleName === 'memo') {
-      return 'memo';
-    } else {
-      throw new Error(`Unknown module: ${moduleName}`);
+  private static async clearAllTables(): Promise<void> {
+    const orm = getORM();
+    const allTasks = await orm.query(Task).find() as Task[];
+    for (const item of allTasks) {
+      await orm.delete(item);
+    }
+    const allHabits = await orm.query(Habit).find() as Habit[];
+    for (const item of allHabits) {
+      await orm.delete(item);
+    }
+    const allHabitLogs = await orm.query(HabitLog).find() as HabitLog[];
+    for (const item of allHabitLogs) {
+      await orm.delete(item);
+    }
+    const allCollections = await orm.query(Collection).find() as Collection[];
+    for (const item of allCollections) {
+      await orm.delete(item);
+    }
+    const allMemos = await orm.query(Memo).find() as Memo[];
+    for (const item of allMemos) {
+      await orm.delete(item);
     }
   }
 
-  /**
-   * 查询表中所有数据
-   */
-  private static async queryAll<T>(tableName: string): Promise<T[]> {
-    try {
-      const dbHelper = DbHelper.getInstance();
-      const store = dbHelper.getRdbStore();
-      const predicates = new relationalStore.RdbPredicates(tableName);
-      const result = await store.query(predicates);
-      
-      const list: T[] = [];
-      while (result.goToNextRow()) {
-        const obj: Record<string, Object> = {};
-        for (let i = 0; i < result.columnCount; i++) {
-          const columnName = result.getColumnName(i);
-          obj[columnName] = result.getValue(i) as Object;
-        }
-        list.push(obj as T);
-      }
-      result.close();
-      return list;
-    } catch (e) {
-      console.error(`Query ${tableName} failed: ${e}`);
-      return [];
+  private static async insertAll(items: Object[]): Promise<void> {
+    const orm = getORM();
+    for (const item of items) {
+      await orm.insert(item);
     }
   }
 
-  /**
-   * 保存到文件
-   */
-  private static async saveToFile(context: Context, fileName: string, content: string): Promise<void> {
-    // 使用文件选择器让用户选择保存位置
-    const documentPicker = new picker.DocumentViewPicker(context);
-    const saveOptions = new picker.DocumentSaveOptions();
-    saveOptions.newFileNames = [fileName];
-    
-    try {
-      const result = await documentPicker.save(saveOptions);
-      if (result && result.length > 0) {
-        const uri = result[0];
-        const file = fs.openSync(uri, fs.OpenMode.WRITE_ONLY | fs.OpenMode.CREATE);
-        fs.writeSync(file.fd, content);
-        fs.closeSync(file);
-        console.info(`File saved to: ${uri}`);
-      }
-    } catch (e) {
-      console.error(`Save file failed: ${e}`);
-      throw new Error(`Save file failed: ${e}`);
-    }
+  private static async restoreData(exportData: ExportData): Promise<void> {
+    await ExportUtil.clearAllTables();
+    const data = exportData.data;
+    await ExportUtil.insertAll(data.tasks);
+    await ExportUtil.insertAll(data.habits);
+    await ExportUtil.insertAll(data.habitLogs);
+    await ExportUtil.insertAll(data.collections);
+    await ExportUtil.insertAll(data.memos);
   }
 }

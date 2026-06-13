@@ -8,7 +8,7 @@
   "dependencies": {
     "core.model": "file:../../core/model",
     "core.database": "file:../../core/database",
-    "core.util": "file:../../core/util",
-    "core.ui": "file:../../core/ui"
+    "common.util": "file:../../common/util",
+    "common.ui": "file:../../common/ui"
   }
 }

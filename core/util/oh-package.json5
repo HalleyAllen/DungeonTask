@@ -6,7 +6,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "core.database": "file:../database",
-    "core.model": "file:../model"
+    "core.model": "file:../model",
+    "common.util": "file:../../common/util"
   }
 }

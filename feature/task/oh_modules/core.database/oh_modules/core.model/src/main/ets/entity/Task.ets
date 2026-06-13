@@ -1,43 +1,56 @@
-/**
- * 任务排序更新参数
- */
-export interface SortOrderItem {
-  id: number;
-  sortOrder: number;
-  priority: number;
-}
+﻿import { Table, PrimaryKey, Column, ColumnType } from '@ibestservices/ibest-orm';
 
 /**
- * 任务实体类
- * 支持层级拆分（parentId/level/sortOrder）
+ * 任务实体
  */
+@Table({ name: 'task' })
 export class Task {
-  /** 自增主键 */
+  @PrimaryKey({ autoIncrement: true })
   id: number = 0;
-  /** 任务标题 */
+
+  @Column({ type: ColumnType.TEXT, notNull: true })
   title: string = '';
-  /** 任务内容/备注 */
+
+  @Column({ type: ColumnType.TEXT })
   content: string = '';
-  /** 所属日期 YYYY-MM-DD */
+
+  @Column({ type: ColumnType.TEXT, notNull: true })
   date: string = '';
-  /** 是否完成 0=未完成 1=已完成 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   completed: number = 0;
-  /** 排序优先级，数值越大越靠前 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   priority: number = 0;
-  /** 父任务ID，0=顶级任务 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   parentId: number = 0;
-  /** 层级深度 0-4 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   level: number = 0;
-  /** 同级排序序号 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   sortOrder: number = 0;
-  /** 标签（逗号分隔） */
+
+  @Column({ type: ColumnType.TEXT, defaultValue: '' })
   tag: string = '';
-  /** 创建时间戳(ms) */
-  createTime: number = 0;
-  /** 更新时间戳(ms) */
-  updateTime: number = 0;
-  /** 同步：写入设备标识 */
+
+  @Column({ type: ColumnType.TEXT, defaultValue: '' })
   deviceId: string = '';
-  /** 同步：0=未同步 1=已同步 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   syncStatus: number = 0;
+
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  createTime: number = 0;
+
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  updateTime: number = 0;
 }
+
+/** 排序更新项 */
+export class SortOrderItem  {
+  id: number=0;
+  sortOrder: number=0;
+  priority: number=0;
+};

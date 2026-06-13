@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 主 Tab 页面 - 底部导航
  * 作为 HMRouter 首页加载
  */
@@ -37,9 +37,9 @@ function getTabIcon(key: string): Resource {
 
 function getPageVisible(visibleStr: string, key: string): boolean {
   if (!visibleStr) return true;
-  const pairs = visibleStr.split(',');
+  const pairs: string[] = visibleStr.split(',');
   for (const pair of pairs) {
-    const parts = pair.split(':');
+    const parts: string[] = pair.split(':');
     if (parts.length === 2 && parts[0] === key) {
       return parts[1] === '1';
     }
@@ -84,7 +84,7 @@ export struct MainPage {
 
       const result: TabItem[] = [];
       for (const key of savedOrder) {
-        const visible = getPageVisible(visibleStr, key);
+        const visible: boolean = getPageVisible(visibleStr, key);
         if (visible) {
           result.push({
             key: key,

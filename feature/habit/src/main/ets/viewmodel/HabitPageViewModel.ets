@@ -1,11 +1,10 @@
-/**
+﻿/**
  * 习惯列表页 ViewModel
  * 管理习惯列表数据加载、打卡、统计等业务逻辑
  */
 import { Habit, HabitLog } from 'core.model';
-import { HabitRepository } from '../repository/HabitRepository';
-import { HabitLogRepository } from '../repository/HabitLogRepository';
-import { DateUtil } from 'core.util';
+import { HabitRepository, HabitLogRepository } from 'core.database';
+import { DateUtil } from 'common.util';
 
 @Observed
 export class HabitPageViewModel {
@@ -20,7 +19,7 @@ export class HabitPageViewModel {
   async loadHabits(): Promise<void> {
     this.isLoading = true;
     try {
-      this.habits = await this.habitRepo.queryAll();
+      this.habits = await this.habitRepo.findAll();
       await this.loadTodayCheckin();
     } catch (e) {
       console.error('Load habits failed:', e);
@@ -43,7 +42,7 @@ export class HabitPageViewModel {
 
       if (!isToday) continue;
 
-      const log = await this.logRepo.queryByDate(habit.id, today);
+      const log: HabitLog | null = await this.logRepo.findByDate(habit.id, today);
       if (log) {
         this.todayChecked.set(habit.id, log.completed === 1);
         this.todayLogs.set(habit.id, log);
@@ -54,11 +53,12 @@ export class HabitPageViewModel {
   async toggleCheckin(habit: Habit): Promise<void> {
     try {
       const today = DateUtil.getToday();
-      const existing = await this.logRepo.queryByDate(habit.id, today);
+      const existing: HabitLog | null = await this.logRepo.findByDate(habit.id, today);
 
       if (existing) {
         await this.logRepo.checkin(
           habit.id,
+          today,
           existing.completed !== 1,
           existing.actualSets,
           existing.actualReps,
@@ -67,6 +67,7 @@ export class HabitPageViewModel {
       } else {
         await this.logRepo.checkin(
           habit.id,
+          today,
           true,
           habit.targetSets,
           habit.targetReps,

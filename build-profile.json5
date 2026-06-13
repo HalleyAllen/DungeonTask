@@ -38,10 +38,20 @@
         }
       ]
     },
+    // ===== common 通用层（跨项目可复用）=====
     {
-      "name": "core.base",
-      "srcPath": "./core/base"
+      "name": "common.base",
+      "srcPath": "./common/base"
     },
+    {
+      "name": "common.ui",
+      "srcPath": "./common/ui"
+    },
+    {
+      "name": "common.util",
+      "srcPath": "./common/util"
+    },
+    // ===== core 项目特定层 =====
     {
       "name": "core.database",
       "srcPath": "./core/database"
@@ -51,13 +61,10 @@
       "srcPath": "./core/model"
     },
     {
-      "name": "core.ui",
-      "srcPath": "./core/ui"
-    },
-    {
       "name": "core.util",
       "srcPath": "./core/util"
     },
+    // ===== feature 业务层 =====
     {
       "name": "feature.task",
       "srcPath": "./feature/task"

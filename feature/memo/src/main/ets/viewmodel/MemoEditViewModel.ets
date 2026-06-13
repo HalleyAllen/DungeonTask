@@ -1,10 +1,10 @@
-/**
+﻿/**
  * 备忘录编辑 ViewModel
  * 管理备忘录编辑页的状态和业务逻辑
  */
 import { Memo, EditPageParams } from 'core.model';
-import { MemoRepository } from '../repository/MemoRepository';
-import { DateUtil } from 'core.util';
+import { MemoRepository } from 'core.database';
+import { DateUtil } from 'common.util';
 
 @Observed
 export class MemoEditViewModel {
@@ -27,7 +27,7 @@ export class MemoEditViewModel {
 
   async loadMemo(): Promise<void> {
     try {
-      const memo = await this.repo.queryById(this.memoId);
+      const memo: Memo | null = await this.repo.findById(this.memoId);
       if (memo) {
         this.content = memo.content;
       }

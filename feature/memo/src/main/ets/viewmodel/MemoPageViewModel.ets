@@ -1,9 +1,9 @@
-/**
+﻿/**
  * 备忘录列表页 ViewModel
  * 管理备忘录列表数据加载、搜索、删除等业务逻辑
  */
 import { Memo } from 'core.model';
-import { MemoRepository } from '../repository/MemoRepository';
+import { MemoRepository } from 'core.database';
 
 @Observed
 export class MemoPageViewModel {
@@ -17,7 +17,7 @@ export class MemoPageViewModel {
       if (this.searchText) {
         this.memos = await this.repo.search(this.searchText);
       } else {
-        this.memos = await this.repo.queryAll();
+        this.memos = await this.repo.findAll();
       }
     } catch (e) {
       console.error('Load memos failed:', e);
@@ -26,7 +26,7 @@ export class MemoPageViewModel {
 
   async deleteMemo(id: number): Promise<void> {
     try {
-      await this.repo.delete(id);
+      await this.repo.deleteById(id);
       await this.loadMemos();
     } catch (e) {
       console.error('Delete memo failed:', e);

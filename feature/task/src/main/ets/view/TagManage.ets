@@ -1,8 +1,8 @@
-/**
+﻿/**
  * 标签管理页面
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
-import { EmptyState, TextInputDialog } from 'core.ui';
+import { EmptyState, TextInputDialog } from 'common.ui';
 import { TagManageViewModel, TagStat } from '../viewmodel/TagManageViewModel';
 
 @HMRouter({ pageUrl: 'TagManage' })

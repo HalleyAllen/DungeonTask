@@ -1,10 +1,10 @@
-/**
+﻿/**
  * 习惯编辑 ViewModel
  * 管理习惯编辑页的状态和业务逻辑
  */
 import { Habit } from 'core.model';
-import { HabitRepository } from '../repository/HabitRepository';
-import { DateUtil } from 'core.util';
+import { HabitRepository } from 'core.database';
+import { DateUtil } from 'common.util';
 
 const CATEGORY_OPTIONS: string[] = ['运动', '学习', '健康', '生活', '其他'];
 const CATEGORY_COLORS: Record<string, string> = {
@@ -54,7 +54,7 @@ export class HabitEditViewModel {
 
     try {
       const selectedDaysArr: string[] = [];
-      for (let i = 0; i < 7; i++) {
+      for (let i: number = 0; i < 7; i++) {
         if (this.weekDays[i]) {
           selectedDaysArr.push(String(i + 1));
         }

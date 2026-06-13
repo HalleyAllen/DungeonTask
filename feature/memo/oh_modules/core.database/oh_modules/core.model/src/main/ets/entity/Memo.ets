@@ -1,17 +1,25 @@
+﻿import { Table, PrimaryKey, Column, ColumnType } from '@ibestservices/ibest-orm';
+
 /**
- * 备忘录实体类
+ * 备忘录实体
  */
+@Table({ name: 'memo' })
 export class Memo {
-  /** 自增主键 */
+  @PrimaryKey({ autoIncrement: true })
   id: number = 0;
-  /** 备忘录内容 */
+
+  @Column({ type: ColumnType.TEXT, notNull: true })
   content: string = '';
-  /** 创建时间戳(ms)（用于倒序排序） */
-  createTime: number = 0;
-  /** 更新时间戳(ms) */
-  updateTime: number = 0;
-  /** 同步：写入设备标识 */
+
+  @Column({ type: ColumnType.TEXT, defaultValue: '' })
   deviceId: string = '';
-  /** 同步：0=未同步 1=已同步 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   syncStatus: number = 0;
+
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  createTime: number = 0;
+
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  updateTime: number = 0;
 }

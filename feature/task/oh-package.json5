@@ -6,9 +6,9 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "core.util": "file:../../core/util",
     "core.model": "file:../../core/model",
-    "core.ui": "file:../../core/ui",
-    "core.database": "file:../../core/database"
+    "core.database": "file:../../core/database",
+    "common.util": "file:../../common/util",
+    "common.ui": "file:../../common/ui"
   }
 }

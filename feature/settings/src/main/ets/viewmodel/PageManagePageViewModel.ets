@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 页面管理 ViewModel
  * 管理导航栏页面的排序与显隐控制
  */
@@ -116,10 +116,10 @@ export class PageManagePageViewModel {
     if (idx < 0) {
       return this.pageConfigs;
     }
-    const direction = steps > 0 ? 1 : -1;
-    const count = Math.abs(steps);
-    let current = idx;
-    for (let i = 0; i < count; i++) {
+    const direction: number = steps > 0 ? 1 : -1;
+    const count: number = Math.abs(steps);
+    let current: number = idx;
+    for (let i: number = 0; i < count; i++) {
       const target = current + direction;
       if (target < 0 || target >= arr.length) {
         break;
@@ -167,9 +167,9 @@ function getPageLabel(key: string): string {
 
 function getPageVisible(visibleStr: string, key: string): boolean {
   if (!visibleStr) return true;
-  const pairs = visibleStr.split(',');
+  const pairs: string[] = visibleStr.split(',');
   for (const pair of pairs) {
-    const parts = pair.split(':');
+    const parts: string[] = pair.split(':');
     if (parts.length === 2 && parts[0] === key) {
       return parts[1] === '1';
     }

@@ -1,24 +1,34 @@
+﻿import { Table, PrimaryKey, Column, ColumnType } from '@ibestservices/ibest-orm';
+
 /**
  * 收藏类型实体
- * 支持内置类型（句子/词语/台词/知识点）+ 用户自定义类型
  */
+@Table({ name: 'collection_type' })
 export class CollectionType {
-  /** 自增主键 */
+  @PrimaryKey({ autoIncrement: true })
   id: number = 0;
-  /** 类型标识（如 sentence/word/quote/knowledge） */
+
+  @Column({ type: ColumnType.TEXT, notNull: true })
   name: string = '';
-  /** 显示名称 */
+
+  @Column({ type: ColumnType.TEXT, notNull: true })
   label: string = '';
-  /** 是否内置类型 1=是 0=否（用户自定义） */
-  isBuiltIn: number = 0;
-  /** 排序 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 1 })
+  isBuiltIn: number = 1;
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   sortOrder: number = 0;
-  /** 创建时间戳(ms) */
-  createTime: number = 0;
-  /** 更新时间戳(ms) */
-  updateTime: number = 0;
-  /** 同步：写入设备标识 */
+
+  @Column({ type: ColumnType.TEXT, defaultValue: '' })
   deviceId: string = '';
-  /** 同步：0=未同步 1=已同步 */
+
+  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
   syncStatus: number = 0;
+
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  createTime: number = 0;
+
+  @Column({ type: ColumnType.INTEGER, notNull: true })
+  updateTime: number = 0;
 }
