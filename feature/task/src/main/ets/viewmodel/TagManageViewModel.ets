@@ -1,11 +1,14 @@
 ﻿/**
- * 标签管理 ViewModel（仅任务表）
+ * 标签管理 ViewModel
+ *
+ * 统一管理标签的增删改查，数据来源：
+ * - Tag 表：标签持久化及顶栏显示状态
+ * - Task 表：标签引用计数
  */
-import { Task } from 'core.model';
 import { TaskRepository, TagRepository } from 'core.database';
 
 /**
- * 标签统计
+ * 标签统计信息
  */
 export interface TagStat {
   tag: string;
@@ -17,19 +20,19 @@ export interface TagStat {
 
 @ObservedV2
 export class TagManageViewModel {
-  /** 标签列表（含引用数） */
+  /** 标签列表（含引用统计） */
   @Trace tagStats: TagStat[] = [];
-  /** 是否正在编辑 */
-  @Trace editingTag: string = '';
-  /** 编辑中的值 */
-  @Trace editValue: string = '';
   @Trace isLoading: boolean = false;
+  /** 当前编辑目标的标签名（供编辑弹窗回调使用） */
+  editTarget: string = '';
 
   private taskRepo: TaskRepository = new TaskRepository();
   private tagRepo: TagRepository = new TagRepository();
 
+  // ==================== 查 ====================
+
   /**
-   * 加载标签列表（Tag 表 + 任务表中的引用计数）
+   * 加载全部标签列表（Tag 表 + 任务引用计数）
    */
   async loadTags(): Promise<void> {
     this.isLoading = true;
@@ -45,7 +48,7 @@ export class TagManageViewModel {
         }
       }
 
-      // 2. 从 Tag 表加载已持久化的标签，合并计数和显示状态
+      // 2. 从 Tag 表加载已持久化标签，合并计数与显示状态
       const persistedTags = await this.tagRepo.queryAll();
       const tagSet = new Set<string>();
       const showMap = new Map<string, boolean>();
@@ -69,48 +72,52 @@ export class TagManageViewModel {
     }
   }
 
-  /**
-   * 开始编辑标签
-   */
-  startEdit(tag: string): void {
-    this.editingTag = tag;
-    this.editValue = tag;
-  }
+  // ==================== 增 ====================
 
   /**
-   * 取消编辑
+   * 新建标签
+   * @returns 空字符串表示成功，非空=错误信息
    */
-  cancelEdit(): void {
-    this.editingTag = '';
-    this.editValue = '';
-  }
-
-  /**
-   * 确认重命名
-   */
-  async confirmRename(): Promise<void> {
-    const newName = this.editValue.trim();
-    if (!newName || newName === this.editingTag) {
-      this.cancelEdit();
-      return;
+  async createTag(name: string): Promise<string> {
+    const trimmed = name.trim();
+    if (!trimmed) return '';
+    if (this.tagStats.some(s => s.tag === trimmed)) {
+      return '标签已存在';
     }
-    if (this.tagStats.some(s => s.tag === newName)) {
-      console.error('标签已存在');
-      return;
+    const id = await this.tagRepo.add(trimmed);
+    if (id <= 0) {
+      return '创建标签失败';
     }
-    await this.taskRepo.renameTag(this.editingTag, newName);
-    await this.tagRepo.rename(this.editingTag, newName);
-    this.cancelEdit();
-    await this.loadTags();
+    this.tagStats = [...this.tagStats, { tag: trimmed, taskCount: 0, showInTopBar: false }];
+    return '';
   }
 
+  // ==================== 改（重命名） ====================
+
   /**
-   * 删除标签
+   * 重命名标签
+   * @returns 空字符串表示成功，非空=错误信息
    */
-  async deleteTag(tag: string): Promise<void> {
-    await this.taskRepo.deleteTag(tag);
-    await this.tagRepo.delete(tag);
-    await this.loadTags();
+  async renameTag(oldName: string, newName: string): Promise<string> {
+    const trimmed = newName.trim();
+    if (!trimmed) {
+      return '标签名称不能为空';
+    }
+    if (trimmed === oldName) {
+      return '';
+    }
+    if (this.tagStats.some(s => s.tag === trimmed)) {
+      return '标签已存在';
+    }
+    try {
+      await this.taskRepo.renameTag(oldName, trimmed);
+      await this.tagRepo.rename(oldName, trimmed);
+      await this.loadTags();
+      return '';
+    } catch (e) {
+      console.error('Rename tag failed:', e);
+      return '重命名失败';
+    }
   }
 
   /**
@@ -124,16 +131,14 @@ export class TagManageViewModel {
     await this.tagRepo.setShowInTopBar(tag, stat.showInTopBar);
   }
 
+  // ==================== 删 ====================
+
   /**
-   * 新建标签，返回空字符串=成功，非空=错误信息
+   * 删除标签（同时清除任务表中的引用）
    */
-  createTag(name: string): string {
-    const trimmed = name.trim();
-    if (!trimmed) return '';
-    if (this.tagStats.some(s => s.tag === trimmed)) {
-      return '标签已存在';
-    }
-    this.tagStats = [...this.tagStats, { tag: trimmed, taskCount: 0, showInTopBar: false }];
-    return '';
+  async deleteTag(tag: string): Promise<void> {
+    await this.taskRepo.deleteTag(tag);
+    await this.tagRepo.delete(tag);
+    await this.loadTags();
   }
 }

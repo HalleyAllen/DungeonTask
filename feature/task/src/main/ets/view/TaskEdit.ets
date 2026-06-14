@@ -3,6 +3,7 @@
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
 import { EditPageParams } from 'core.model';
+import { TitleBar } from 'common.ui';
 import { TaskEditViewModel } from '../viewmodel/TaskEditViewModel';
 
 @HMRouter({ pageUrl: 'TaskEdit' })
@@ -18,31 +19,22 @@ export struct TaskEdit {
   build() {
     Column() {
       // 标题栏
-      Row() {
-        Text('取消')
-          .fontSize(16)
-          .fontColor('#1677FF')
-          .onClick(() => HMRouterMgr.pop())
-
-        Blank()
-
-        Text(this.vm.isEdit ? '编辑任务' : '新增任务')
-          .fontSize(18)
-          .fontWeight(FontWeight.Bold)
-
-        Blank()
-
+      TitleBar({
+        title: this.vm.isEdit ? '编辑任务' : '新增任务',
+        showBack: true,
+        backLabel: '取消',
+        backCallback: () => HMRouterMgr.pop()
+      }) {
         Text('保存')
           .fontSize(16)
           .fontColor('#1677FF')
           .onClick(async () => {
             const ok = await this.vm.save();
-            if (ok) HMRouterMgr.pop();
+            if (ok) {
+              HMRouterMgr.pop();
+            }
           })
       }
-      .width('100%')
-      .padding(16)
-      .backgroundColor('#FFFFFF')
 
       // 表单
       Column() {
@@ -90,6 +82,36 @@ export struct TaskEdit {
           .onChange((value: string) => {
             this.vm.content = value;
           })
+
+        // 标签选择
+        if (this.vm.tagOptions.length > 0) {
+          Text('标签')
+            .fontSize(14)
+            .fontColor('#A6A6A6')
+            .width('100%')
+            .margin({ top: 24, bottom: 8 })
+
+          Row() {
+            ForEach(this.vm.tagOptions, (tagName: string) => {
+              Text(tagName)
+                .fontSize(13)
+                .fontColor(this.vm.isTagSelected(tagName) ? '#FFFFFF' : '#1677FF')
+                .backgroundColor(this.vm.isTagSelected(tagName) ? '#1677FF' : '#E6F4FF')
+                .borderRadius(16)
+                .padding({
+                  left: 14,
+                  right: 14,
+                  top: 6,
+                  bottom: 6
+                })
+                .margin({ right: 8, bottom: 8 })
+                .onClick(() => {
+                  this.vm.toggleTag(tagName);
+                })
+            })
+          }
+          .width('100%')
+        }
       }
       .width('100%')
       .padding(16)

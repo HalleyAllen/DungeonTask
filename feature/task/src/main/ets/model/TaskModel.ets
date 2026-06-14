@@ -4,7 +4,7 @@
 import { relationalStore } from '@kit.ArkData';
 import { DbHelper } from 'core.database';
 import { Task } from 'core.model';
-import { DateUtil } from 'core.util';
+import { DateUtil } from 'common.util';
 
 export class TaskModel {
   private getStore() {

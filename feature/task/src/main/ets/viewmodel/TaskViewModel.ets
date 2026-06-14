@@ -2,19 +2,30 @@
  * 任务列表 ViewModel
  */
 import { Task, SortOrderItem } from 'core.model';
-import { TaskRepository } from 'core.database';
+import { TaskRepository, TagRepository } from 'core.database';
 import { DateUtil } from 'common.util';
 import { HMRouterMgr } from '@hadss/hmrouter';
 
+/** 日期筛选选项 */
+export interface DateFilterOption {
+  label: string;
+  value: string;
+}
 
 @Observed
 export class TaskViewModel {
   taskList: Task[] = [];
-  /** 筛选标签列表 */
-  filterTags: string[] = ["全部"];
+  /** 顶栏显示的标签列表（从 Tag 表可见标签加载） */
+  filterTags: string[] = [];
+  /** 日期筛选选项 */
+  dateFilterOptions: DateFilterOption[] = [
+    { label: '今天', value: 'today' },
+    { label: '本周', value: 'week' },
+    { label: '全部', value: 'all' }
+  ];
   /** 当前选中标签（'' 表示全部） */
   currentTag: string = '';
-  /** 日期筛选：'all' | 'today' | 'week' */
+  /** 日期筛选：'today' | 'week' | 'all' */
   currentDateFilter: string = 'today';
   currentDate: string = '';
   isLoading: boolean = false;
@@ -25,75 +36,62 @@ export class TaskViewModel {
   dragList: Task[] = [];
 
   private taskRepository: TaskRepository = new TaskRepository();
+  private tagRepo: TagRepository = new TagRepository();
 
   /**
-   * 加载任务列表
+   * 根据当前筛选条件加载任务
    */
-  async loadTasks(date?: string): Promise<void> {
+  async loadFilteredTasks(): Promise<void> {
     this.isLoading = true;
-    this.currentDate = date || DateUtil.getToday();
-
     try {
-      this.taskList = await this.taskRepository.queryByDate(this.currentDate);
+      let tasks: Task[];
+
+      // 1. 先按日期筛选
+      if (this.currentDateFilter === 'all') {
+        tasks = await this.taskRepository.queryAll();
+      } else if (this.currentDateFilter === 'week') {
+        tasks = await this.taskRepository.queryByDateRange(
+          DateUtil.getWeekStart(), DateUtil.getWeekEnd()
+        );
+      } else {
+        tasks = await this.taskRepository.queryByDate(DateUtil.getToday());
+      }
+
+      // 2. 再按标签筛选
+      if (this.currentTag) {
+        tasks = tasks.filter((t: Task) => t.tag && t.tag.includes(this.currentTag));
+      }
+
+      this.taskList = tasks;
     } catch (e) {
       this.errorMessage = '加载失败';
-      console.error('Load tasks failed:', e);
+      console.error('Load filtered tasks failed:', e);
     } finally {
       this.isLoading = false;
     }
   }
 
   /**
-   * 加载全部任务
-   */
-  async loadAllTasks(): Promise<void> {
-    this.isLoading = true;
-    this.currentDate = '';
-
-    try {
-      this.taskList = await this.taskRepository.queryAll();
-    } catch (e) {
-      this.errorMessage = '加载失败';
-      console.error('Load all tasks failed:', e);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  /**
-   * 按日期范围筛选
+   * 切换日期筛选
    */
   async filterByDate(type: string): Promise<void> {
     this.currentDateFilter = type;
-    if (type === 'all') {
-      await this.loadAllTasks();
-    } else if (type === 'week') {
-      this.isLoading = true;
-      this.currentDate = '';
-      try {
-        this.taskList = await this.taskRepository.queryByDateRange(
-          DateUtil.getWeekStart(), DateUtil.getWeekEnd()
-        );
-      } catch (e) {
-        this.errorMessage = '加载失败';
-        console.error('Load week tasks failed:', e);
-      } finally {
-        this.isLoading = false;
-      }
+    if (type === 'today') {
+      this.currentDate = DateUtil.getToday();
     } else {
-      // today
-      await this.loadTasks(DateUtil.getToday());
+      this.currentDate = '';
     }
+    await this.loadFilteredTasks();
   }
 
   /**
-   * 加载筛选标签列表
+   * 加载顶栏标签列表（从 Tag 表的可见标签加载）
    */
   async loadFilterTags(): Promise<void> {
     try {
-      this.filterTags = await this.taskRepository.queryTags();
+      this.filterTags = await this.tagRepo.queryVisibleNames();
     } catch (e) {
-      console.error('Load tags failed:', e);
+      console.error('Load filter tags failed:', e);
       this.filterTags = [];
     }
   }
@@ -103,19 +101,7 @@ export class TaskViewModel {
    */
   async filterByTag(tag: string): Promise<void> {
     this.currentTag = tag;
-    this.isLoading = true;
-    try {
-      if (!tag) {
-        this.taskList = await this.taskRepository.queryAll();
-      } else {
-        this.taskList = await this.taskRepository.queryByTag(tag);
-      }
-    } catch (e) {
-      this.errorMessage = '加载失败';
-      console.error('Filter by tag failed:', e);
-    } finally {
-      this.isLoading = false;
-    }
+    await this.loadFilteredTasks();
   }
 
   /**
@@ -130,7 +116,7 @@ export class TaskViewModel {
     task.updateTime = DateUtil.getNow();
 
     await this.taskRepository.insert(task);
-    await this.loadTasks(this.currentDate);
+    await this.loadFilteredTasks();
   }
 
   /**
@@ -138,7 +124,7 @@ export class TaskViewModel {
    */
   async updateTask(task: Task): Promise<void> {
     await this.taskRepository.update(task);
-    await this.loadTasks(this.currentDate);
+    await this.loadFilteredTasks();
   }
 
   /**
@@ -147,7 +133,7 @@ export class TaskViewModel {
   async toggleComplete(task: Task): Promise<void> {
     task.completed = task.completed === 1 ? 0 : 1;
     await this.taskRepository.update(task);
-    await this.loadTasks(this.currentDate);
+    await this.loadFilteredTasks();
   }
 
   /**
@@ -155,7 +141,7 @@ export class TaskViewModel {
    */
   async deleteTask(id: number): Promise<void> {
     await this.taskRepository.delete(id);
-    await this.loadTasks(this.currentDate);
+    await this.loadFilteredTasks();
   }
 
   /**
@@ -173,7 +159,7 @@ export class TaskViewModel {
       return { id: t.id, sortOrder: t.sortOrder, priority: t.priority };
     });
     await this.taskRepository.updateSortOrders(sortItems);
-    await this.loadTasks(this.currentDate);
+    await this.loadFilteredTasks();
   }
 
   // ---- 拖拽排序 ----

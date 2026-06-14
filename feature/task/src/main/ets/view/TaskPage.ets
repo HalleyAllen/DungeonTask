@@ -3,8 +3,8 @@
  */
 import { HMRouter } from '@hadss/hmrouter';
 import { Task } from 'core.model';
-import { TaskViewModel } from '../viewmodel/TaskViewModel';
-import { EmptyState, FloatingActionButton } from 'common.ui';
+import { TaskViewModel, DateFilterOption } from '../viewmodel/TaskViewModel';
+import { EmptyState, FloatingActionButton, TitleBar } from 'common.ui';
 
 @HMRouter({ pageUrl: 'TaskPage' })
 @Component
@@ -12,14 +12,22 @@ export struct TaskPage {
   @State viewModel: TaskViewModel = new TaskViewModel();
 
   aboutToAppear() {
-    this.viewModel.filterByDate('today');
     this.viewModel.loadFilterTags();
+    this.viewModel.loadFilteredTasks();
   }
 
   build() {
     Column() {
-      this.titleBar()
-      this.filterBar()
+      TitleBar({ title: '任务清单' }) {
+        Text('⚙')
+          .fontSize(20)
+          .fontColor('#A6A6A6')
+          .width(40)
+          .height(40)
+          .bindMenu(this.SettingsMenuBuilder)
+      }
+      this.dateFilterBar()
+      this.tagFilterBar()
       this.taskList()
       FloatingActionButton({
         clickFun: () => {
@@ -33,34 +41,35 @@ export struct TaskPage {
 
   }
 
+  // ---- 日期筛选栏 ----
   @Builder
-  titleBar() {
+  dateFilterBar() {
     Row() {
-      Text('任务清单')
-        .fontSize(20)
-        .fontWeight(FontWeight.Bold)
-
-      Blank()
-
-        Text('⚙')
-          .fontSize(20)
-          .fontColor('#A6A6A6')
-        .width(40)
-        .height(40)
-        .bindMenu(this.SettingsMenuBuilder)
+      ForEach(this.viewModel.dateFilterOptions, (opt: DateFilterOption) => {
+        Text(opt.label)
+          .fontSize(14)
+          .fontColor(this.viewModel.currentDateFilter === opt.value ? '#FFFFFF' : '#1F1F1F')
+          .backgroundColor(this.viewModel.currentDateFilter === opt.value ? '#1677FF' : '#F5F5F5')
+          .borderRadius(16)
+          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+          .margin({ right: 8 })
+          .onClick(() => {
+            this.viewModel.filterByDate(opt.value);
+          })
+      })
     }
     .width('100%')
-    .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+    .padding({ left: 16, bottom: 8 })
     .backgroundColor('#FFFFFF')
   }
 
+  // ---- 标签筛选栏 ----
   @Builder
-  filterBar() {
+  tagFilterBar() {
     List() {
       // 全部（固定第一项）
       ListItem() {
         Row(){
-
           Text('全部')
             .fontSize(14)
             .fontColor(!this.viewModel.currentTag ? '#FFFFFF' : '#1F1F1F')
@@ -70,8 +79,6 @@ export struct TaskPage {
           Text('▼')
             .fontSize(14)
             .fontColor(!this.viewModel.currentTag ? '#FFFFFF' : '#1F1F1F')
-            // .padding({ left: 8, right: 8, top: 6, bottom: 6 })
-            // .backgroundColor('#F5F5F5')
             .borderRadius(4)
             .padding({left:8})
             .bindMenu(this.TagMenuBuilder)
@@ -80,7 +87,6 @@ export struct TaskPage {
         .backgroundColor(!this.viewModel.currentTag ? '#1677FF' : '#F5F5F5')
         .borderRadius(16)
       }
-
 
       ForEach(this.viewModel.filterTags, (tag: string) => {
         ListItem() {
@@ -100,7 +106,7 @@ export struct TaskPage {
     .listDirection(Axis.Horizontal)
     .scrollBar(BarState.Off)
     .width('100%')
-    .padding({ left: 16, top: 12, bottom: 12 })
+    .padding({ left: 16, top: 8, bottom: 12 })
     .backgroundColor('#FFFFFF')
   }
 
@@ -201,12 +207,27 @@ export struct TaskPage {
         Text(task.title)
           .fontSize(16)
           .fontColor(task.completed === 1 ? '#A6A6A6' : '#1F1F1F')
-          // .decoration(task.completed === 1 ? TextDecorationType.LineThrough : TextDecorationType.None)
 
         Text(task.date)
           .fontSize(12)
           .fontColor('#A6A6A6')
           .margin({ top: 4 })
+
+        // 标签显示
+        if (task.tag) {
+          Row() {
+            ForEach(task.tag.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0),
+              (tagName: string) => {
+                Text(tagName)
+                  .fontSize(10)
+                  .fontColor('#1677FF')
+                  .backgroundColor('#E6F4FF')
+                  .borderRadius(4)
+                  .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+                  .margin({ right: 4, top: 6 })
+              })
+          }
+        }
       }
       .alignItems(HorizontalAlign.Start)
       .margin({ left: 12 })
