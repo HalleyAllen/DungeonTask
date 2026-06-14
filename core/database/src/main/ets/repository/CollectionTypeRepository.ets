@@ -1,5 +1,8 @@
 ﻿import { CollectionType } from 'core.model';
 import { getORM } from '@ibestservices/ibest-orm';
+import { Logger } from 'common.util';
+
+const TAG = 'CollectionTypeRepo';
 
 export class CollectionTypeRepository {
   async findAll(): Promise<CollectionType[]> {
@@ -8,7 +11,7 @@ export class CollectionTypeRepository {
       const result = await orm.query(CollectionType).find();
       return result as CollectionType[];
     } catch (e) {
-      console.error('CollectionTypeRepository.findAll failed:', e);
+      Logger.error(TAG, 'findAll failed', e);
       return [];
     }
   }
@@ -21,7 +24,7 @@ export class CollectionTypeRepository {
         .first();
       return result as CollectionType | null;
     } catch (e) {
-      console.error('CollectionTypeRepository.findById failed:', e);
+      Logger.error(TAG, `findById failed: id=${id}`, e);
       return null;
     }
   }
@@ -30,9 +33,10 @@ export class CollectionTypeRepository {
     try {
       const orm = getORM();
       const result = await orm.insert(type);
+      Logger.debug(TAG, `insert: id=${type.id}`);
       return result as number;
     } catch (e) {
-      console.error('CollectionTypeRepository.insert failed:', e);
+      Logger.error(TAG, 'insert failed', e);
       return 0;
     }
   }
@@ -43,7 +47,7 @@ export class CollectionTypeRepository {
       const result = await orm.save(type);
       return result as number;
     } catch (e) {
-      console.error('CollectionTypeRepository.update failed:', e);
+      Logger.error(TAG, `update failed: id=${type.id}`, e);
       return 0;
     }
   }
@@ -56,9 +60,10 @@ export class CollectionTypeRepository {
       type.label = label;
       type.isBuiltIn = 0;
       await orm.insert(type);
+      Logger.info(TAG, `createCustom: id=${type.id}, label="${label}"`);
       return type;
     } catch (e) {
-      console.error('CollectionTypeRepository.createCustom failed:', e);
+      Logger.error(TAG, `createCustom failed: "${label}"`, e);
       throw e as Error;
     }
   }
@@ -75,7 +80,7 @@ export class CollectionTypeRepository {
       }
       return 0;
     } catch (e) {
-      console.error('CollectionTypeRepository.deleteById failed:', e);
+      Logger.error(TAG, `deleteById failed: id=${id}`, e);
       return 0;
     }
   }

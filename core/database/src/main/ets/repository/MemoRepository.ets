@@ -1,5 +1,8 @@
 ﻿import { Memo } from 'core.model';
 import { getORM } from '@ibestservices/ibest-orm';
+import { Logger } from 'common.util';
+
+const TAG = 'MemoRepo';
 
 export class MemoRepository {
   async findAll(): Promise<Memo[]> {
@@ -8,7 +11,7 @@ export class MemoRepository {
       const result = await orm.query(Memo).find();
       return result as Memo[];
     } catch (e) {
-      console.error('MemoRepository.findAll failed:', e);
+      Logger.error(TAG, 'findAll failed', e);
       return [];
     }
   }
@@ -21,7 +24,7 @@ export class MemoRepository {
         .first();
       return result as Memo | null;
     } catch (e) {
-      console.error('MemoRepository.findById failed:', e);
+      Logger.error(TAG, `findById failed: id=${id}`, e);
       return null;
     }
   }
@@ -30,9 +33,10 @@ export class MemoRepository {
     try {
       const orm = getORM();
       const result = await orm.insert(memo);
+      Logger.debug(TAG, `insert: id=${memo.id}`);
       return result as number;
     } catch (e) {
-      console.error('MemoRepository.insert failed:', e);
+      Logger.error(TAG, 'insert failed', e);
       return 0;
     }
   }
@@ -43,7 +47,7 @@ export class MemoRepository {
       const result = await orm.save(memo);
       return result as number;
     } catch (e) {
-      console.error('MemoRepository.update failed:', e);
+      Logger.error(TAG, `update failed: id=${memo.id}`, e);
       return 0;
     }
   }
@@ -53,7 +57,7 @@ export class MemoRepository {
       const all = await this.findAll();
       return all.filter((m: Memo) => m.content && m.content.includes(keyword));
     } catch (e) {
-      console.error('MemoRepository.search failed:', e);
+      Logger.error(TAG, `search failed: "${keyword}"`, e);
       return [];
     }
   }
@@ -70,7 +74,7 @@ export class MemoRepository {
       }
       return 0;
     } catch (e) {
-      console.error('MemoRepository.deleteById failed:', e);
+      Logger.error(TAG, `deleteById failed: id=${id}`, e);
       return 0;
     }
   }

@@ -3,7 +3,9 @@
  * 管理导航栏页面的排序与显隐控制
  */
 import { preferences } from '@kit.ArkData';
+import { Logger } from 'common.util';
 
+const TAG = 'PageManageVM';
 const PREF_NAME: string = 'dungeontask_settings';
 const KEY_PAGE_ORDER: string = 'page_order';
 const KEY_PAGE_VISIBLE: string = 'page_visible';
@@ -44,6 +46,7 @@ export class PageManagePageViewModel {
       }
       this.pageConfigs = configs;
     } catch (e) {
+      Logger.error(TAG, 'loadPageConfig failed, using defaults', e);
       // 加载失败用默认值
       this.pageConfigs = DEFAULT_PAGE_CONFIGS.slice();
     }
@@ -61,7 +64,7 @@ export class PageManagePageViewModel {
       await prefs.put(KEY_PAGE_VISIBLE, visibleStr);
       await prefs.flush();
     } catch (e) {
-      console.error('Save page config failed:', e);
+      Logger.error(TAG, 'savePageConfig failed', e);
     }
   }
 

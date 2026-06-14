@@ -2,6 +2,9 @@
 import { getORM } from '@ibestservices/ibest-orm';
 import { Task, Habit, HabitLog, Collection, Memo, ExportData } from 'core.model';
 import { util } from '@kit.ArkTS';
+import { Logger } from 'common.util';
+
+const TAG = 'SettingsVM';
 
 /** 设置项 */
 export interface SettingsItem {
@@ -28,7 +31,7 @@ export class SettingsViewModel {
         this.syncCode = code;
       });
     } catch (e) {
-      console.error('Generate sync code failed:', e);
+      Logger.error(TAG, 'generateSyncCode failed', e);
     }
   }
 
@@ -43,7 +46,7 @@ export class SettingsViewModel {
       await this.restoreFromExport(exportData);
       return true;
     } catch (e) {
-      console.error('Import by sync code failed:', e);
+      Logger.error(TAG, 'importBySyncCode failed', e);
       return false;
     }
   }
@@ -57,7 +60,7 @@ export class SettingsViewModel {
       await orm.query(Collection).delete();
       await orm.query(Memo).delete();
     } catch (e) {
-      console.error('Clear data failed:', e);
+      Logger.error(TAG, 'clearAllData failed', e);
     }
   }
 

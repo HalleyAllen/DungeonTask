@@ -4,7 +4,9 @@
  */
 import { Memo, EditPageParams } from 'core.model';
 import { MemoRepository } from 'core.database';
-import { DateUtil } from 'common.util';
+import { DateUtil, Logger } from 'common.util';
+
+const TAG = 'MemoEditVM';
 
 @Observed
 export class MemoEditViewModel {
@@ -18,10 +20,14 @@ export class MemoEditViewModel {
    * 初始化（根据路由参数判断新增/编辑）
    */
   async init(params: EditPageParams | undefined): Promise<void> {
-    if (params && params.id) {
-      this.isEdit = true;
-      this.memoId = params.id;
-      await this.loadMemo();
+    try {
+      if (params && params.id) {
+        this.isEdit = true;
+        this.memoId = params.id;
+        await this.loadMemo();
+      }
+    } catch (e) {
+      Logger.error(TAG, 'init failed', e);
     }
   }
 
@@ -32,7 +38,7 @@ export class MemoEditViewModel {
         this.content = memo.content;
       }
     } catch (e) {
-      console.error('Load memo failed:', e);
+      Logger.error(TAG, 'loadMemo failed', e);
     }
   }
 
@@ -53,7 +59,7 @@ export class MemoEditViewModel {
       }
       return true;
     } catch (e) {
-      console.error('Save memo failed:', e);
+      Logger.error(TAG, 'save failed', e);
       return false;
     }
   }

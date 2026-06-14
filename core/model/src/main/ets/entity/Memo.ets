@@ -1,25 +1,13 @@
-﻿import { Table, PrimaryKey, Column, ColumnType } from '@ibestservices/ibest-orm';
-
 /**
- * 备忘录实体
+ * 备忘录实体类
  */
-@Table({ name: 'memo' })
 export class Memo {
-  @PrimaryKey({ autoIncrement: true })
+  /** 自增主键 */
   id: number = 0;
-
-  @Column({ type: ColumnType.TEXT, notNull: true })
+  /** 备忘录内容 */
   content: string = '';
-
-  @Column({ type: ColumnType.TEXT, defaultValue: '' })
-  deviceId: string = '';
-
-  @Column({ type: ColumnType.INTEGER, defaultValue: 0 })
-  syncStatus: number = 0;
-
-  @Column({ type: ColumnType.INTEGER, notNull: true })
+  /** 创建时间戳（用于倒序排序） */
   createTime: number = 0;
-
-  @Column({ type: ColumnType.INTEGER, notNull: true })
+  /** 更新时间戳 */
   updateTime: number = 0;
 }

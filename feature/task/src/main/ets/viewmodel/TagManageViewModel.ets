@@ -11,6 +11,8 @@ export interface TagStat {
   tag: string;
   /** 任务中引用数 */
   taskCount: number;
+  /** 是否在顶栏显示 */
+  showInTopBar: boolean;
 }
 
 @ObservedV2
@@ -37,20 +39,25 @@ export class TagManageViewModel {
       const all = await this.taskRepo.queryAll();
       for (const t of all) {
         if (!t.tag) continue;
-        const tags = t.tag.split(',').map(s => s.trim()).filter(s => s);
+        const tags = t.tag.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
         for (const tag of tags) {
           countMap.set(tag, (countMap.get(tag) || 0) + 1);
         }
       }
 
-      // 2. 从 Tag 表加载已持久化的标签名，合并计数
-      const persistedNames = await this.tagRepo.queryAllNames();
-      const tagSet = new Set<string>(persistedNames);
-      countMap.forEach((_, tag) => tagSet.add(tag));
+      // 2. 从 Tag 表加载已持久化的标签，合并计数和显示状态
+      const persistedTags = await this.tagRepo.queryAll();
+      const tagSet = new Set<string>();
+      const showMap = new Map<string, boolean>();
+      for (const pt of persistedTags) {
+        tagSet.add(pt.name);
+        showMap.set(pt.name, pt.showInTopBar !== 0);
+      }
+      countMap.forEach((_: number, tag: string) => tagSet.add(tag));
 
       const newStats: TagStat[] = [];
-      tagSet.forEach(tag => {
-        newStats.push({ tag, taskCount: countMap.get(tag) || 0 });
+      tagSet.forEach((tag: string) => {
+        newStats.push({ tag, taskCount: countMap.get(tag) || 0, showInTopBar: showMap.get(tag) || false });
       });
 
       this.tagStats = newStats;
@@ -91,7 +98,8 @@ export class TagManageViewModel {
       console.error('标签已存在');
       return;
     }
-    await this.repo.renameTag(this.editingTag, newName);
+    await this.taskRepo.renameTag(this.editingTag, newName);
+    await this.tagRepo.rename(this.editingTag, newName);
     this.cancelEdit();
     await this.loadTags();
   }
@@ -100,8 +108,20 @@ export class TagManageViewModel {
    * 删除标签
    */
   async deleteTag(tag: string): Promise<void> {
-    await this.repo.deleteTag(tag);
+    await this.taskRepo.deleteTag(tag);
+    await this.tagRepo.delete(tag);
     await this.loadTags();
+  }
+
+  /**
+   * 切换标签顶栏显示状态
+   */
+  async toggleShowInTopBar(tag: string): Promise<void> {
+    const stat = this.tagStats.find((s: TagStat) => s.tag === tag);
+    if (!stat) return;
+    stat.showInTopBar = !stat.showInTopBar;
+    this.tagStats = [...this.tagStats];
+    await this.tagRepo.setShowInTopBar(tag, stat.showInTopBar);
   }
 
   /**
@@ -113,7 +133,7 @@ export class TagManageViewModel {
     if (this.tagStats.some(s => s.tag === trimmed)) {
       return '标签已存在';
     }
-    this.tagStats = [...this.tagStats, { tag: trimmed, taskCount: 0 }];
+    this.tagStats = [...this.tagStats, { tag: trimmed, taskCount: 0, showInTopBar: false }];
     return '';
   }
 }

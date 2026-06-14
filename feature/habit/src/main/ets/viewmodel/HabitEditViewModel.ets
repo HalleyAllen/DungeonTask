@@ -4,7 +4,9 @@
  */
 import { Habit } from 'core.model';
 import { HabitRepository } from 'core.database';
-import { DateUtil } from 'common.util';
+import { DateUtil, Logger } from 'common.util';
+
+const TAG = 'HabitEditVM';
 
 const CATEGORY_OPTIONS: string[] = ['运动', '学习', '健康', '生活', '其他'];
 const CATEGORY_COLORS: Record<string, string> = {
@@ -77,7 +79,7 @@ export class HabitEditViewModel {
       await this.repo.insert(habit);
       return true;
     } catch (e) {
-      console.error('Save habit failed:', e);
+      Logger.error(TAG, 'save failed', e);
       return false;
     }
   }

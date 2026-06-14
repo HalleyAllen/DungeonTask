@@ -53,7 +53,7 @@ export class TaskRepository {
     const tagSet = new Set<string>();
     for (const t of all) {
       if (t.tag) {
-        t.tag.split(',').map(s => s.trim()).filter(s => s).forEach(tag => tagSet.add(tag));
+        t.tag.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0).forEach((tag: string) => tagSet.add(tag));
       }
     }
     return Array.from(tagSet);
@@ -62,7 +62,7 @@ export class TaskRepository {
   /** 按标签筛选 */
   async queryByTag(tag: string): Promise<Task[]> {
     const all = await this.queryAll();
-    return all.filter(t => t.tag && t.tag.includes(tag));
+    return all.filter((t: Task) => t.tag && t.tag.includes(tag));
   }
 
   /** 重命名标签 */
@@ -71,7 +71,7 @@ export class TaskRepository {
     const now = DateUtil.getNow();
     for (const t of all) {
       if (!t.tag) continue;
-      const tags = t.tag.split(',').map(s => s.trim());
+      const tags = t.tag.split(',').map((s: string) => s.trim());
       const idx = tags.indexOf(oldTag);
       if (idx >= 0) {
         tags[idx] = newTag;
@@ -89,7 +89,7 @@ export class TaskRepository {
     const now = DateUtil.getNow();
     for (const t of all) {
       if (!t.tag) continue;
-      const tags = t.tag.split(',').map(s => s.trim());
+      const tags = t.tag.split(',').map((s: string) => s.trim());
       const idx = tags.indexOf(tag);
       if (idx >= 0) {
         tags.splice(idx, 1);

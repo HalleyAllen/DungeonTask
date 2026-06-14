@@ -1,8 +1,7 @@
 # DungeonTask 数据库设计文档
 
-> 版本：v1.1  
+> 版本：v1.0  
 > 创建日期：2026-05-23  
-> 更新时间：2026-05-24  
 > 数据库：SQLite（通过 IBest-ORM 操作）  
 > 对应需求：requirements.md
 
@@ -34,8 +33,6 @@
 | parentId | INTEGER | NOT NULL INDEX | 0 | 父任务ID，0=顶级任务 |
 | level | INTEGER | NOT NULL | 0 | 层级深度 0-4（限制5层） |
 | sortOrder | INTEGER | - | 0 | 同级排序序号 |
-| deviceId | TEXT | - | '' | 写入设备标识（同步用） |
-| syncStatus | INTEGER | - | 0 | 同步状态：0=未同步 1=已同步 |
 | createTime | INTEGER | NOT NULL | 0 | 创建时间戳 |
 | updateTime | INTEGER | NOT NULL | 0 | 更新时间戳 |
 
@@ -76,8 +73,6 @@
 | icon | TEXT | - | '' | 图标/emoji |
 | color | TEXT | - | '' | 主题色 #HEX |
 | sortOrder | INTEGER | - | 0 | 排序序号 |
-| deviceId | TEXT | - | '' | 写入设备标识（同步用） |
-| syncStatus | INTEGER | - | 0 | 同步状态：0=未同步 1=已同步 |
 | createTime | INTEGER | NOT NULL | 0 | 创建时间戳 |
 | updateTime | INTEGER | NOT NULL | 0 | 更新时间戳 |
 
@@ -113,10 +108,7 @@
 | actualReps | INTEGER | - | 0 | 实际每组次数 |
 | actualDuration | INTEGER | - | 0 | 实际时长（分钟） |
 | note | TEXT | - | '' | 备注（当天感受） |
-| deviceId | TEXT | - | '' | 写入设备标识（同步用） |
-| syncStatus | INTEGER | - | 0 | 同步状态：0=未同步 1=已同步 |
 | createTime | INTEGER | NOT NULL | 0 | 创建时间戳 |
-| updateTime | INTEGER | NOT NULL | 0 | 更新时间戳 |
 
 **索引**：`idx_habitlog_habitId` ON `(habitId)`, `idx_habitlog_date` ON `(date)`
 
@@ -138,10 +130,7 @@ habit_log.actual*=3,12   ← 当天实际（3组×12，第3组没做完）
 | label | TEXT | NOT NULL | '' | 显示名称（"句子"/"歌词"...） |
 | isBuiltIn | INTEGER | - | 1 | 1=内置类型 0=用户自定义 |
 | sortOrder | INTEGER | - | 0 | 排序序号 |
-| deviceId | TEXT | - | '' | 写入设备标识（同步用） |
-| syncStatus | INTEGER | - | 0 | 同步状态：0=未同步 1=已同步 |
 | createTime | INTEGER | NOT NULL | 0 | 创建时间戳 |
-| updateTime | INTEGER | NOT NULL | 0 | 更新时间戳 |
 
 **内置类型**（首次建库自动种入）：
 ```
@@ -165,8 +154,6 @@ habit_log.actual*=3,12   ← 当天实际（3组×12，第3组没做完）
 | content | TEXT | - | '' | 主体内容（句子全文 / 释义…） |
 | extra | TEXT | - | '' | 扩展字段 JSON（拼音、出处等类型特有信息） |
 | tag | TEXT | - | '' | 标签（逗号分隔） |
-| deviceId | TEXT | - | '' | 写入设备标识（同步用） |
-| syncStatus | INTEGER | - | 0 | 同步状态：0=未同步 1=已同步 |
 | createTime | INTEGER | NOT NULL | 0 | 创建时间戳 |
 | updateTime | INTEGER | NOT NULL | 0 | 更新时间戳 |
 
@@ -206,8 +193,6 @@ habit_log.actual*=3,12   ← 当天实际（3组×12，第3组没做完）
 |------|------|------|--------|------|
 | id | INTEGER | PRIMARY KEY AUTOINCREMENT | - | 主键自增 |
 | content | TEXT | NOT NULL | '' | 备忘录内容 |
-| deviceId | TEXT | - | '' | 写入设备标识（同步用） |
-| syncStatus | INTEGER | - | 0 | 同步状态：0=未同步 1=已同步 |
 | createTime | INTEGER | NOT NULL INDEX | 0 | 创建时间戳（倒序排列） |
 | updateTime | INTEGER | NOT NULL | 0 | 更新时间戳 |
 
@@ -218,7 +203,7 @@ habit_log.actual*=3,12   ← 当天实际（3组×12，第3组没做完）
 ## SQL 建表语句
 
 ```sql
--- 任务表（支持层级拆分 + 多端同步）
+-- 任务表（支持层级拆分）
 CREATE TABLE IF NOT EXISTS task (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL DEFAULT '',
@@ -229,15 +214,13 @@ CREATE TABLE IF NOT EXISTS task (
   parentId INTEGER NOT NULL DEFAULT 0,
   level INTEGER NOT NULL DEFAULT 0,
   sortOrder INTEGER DEFAULT 0,
-  deviceId TEXT DEFAULT '',
-  syncStatus INTEGER DEFAULT 0,
   createTime INTEGER NOT NULL,
   updateTime INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_task_date ON task(date);
 CREATE INDEX IF NOT EXISTS idx_task_parentId ON task(parentId);
 
--- 习惯模板表（通用抽象 + 多端同步）
+-- 习惯模板表（通用抽象）
 CREATE TABLE IF NOT EXISTS habit (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL DEFAULT '',
@@ -250,14 +233,12 @@ CREATE TABLE IF NOT EXISTS habit (
   icon TEXT DEFAULT '',
   color TEXT DEFAULT '',
   sortOrder INTEGER DEFAULT 0,
-  deviceId TEXT DEFAULT '',
-  syncStatus INTEGER DEFAULT 0,
   createTime INTEGER NOT NULL,
   updateTime INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_habit_category ON habit(category);
 
--- 习惯打卡表（+ 多端同步）
+-- 习惯打卡表
 CREATE TABLE IF NOT EXISTS habit_log (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   habitId INTEGER NOT NULL DEFAULT 0,
@@ -267,39 +248,33 @@ CREATE TABLE IF NOT EXISTS habit_log (
   actualReps INTEGER DEFAULT 0,
   actualDuration INTEGER DEFAULT 0,
   note TEXT DEFAULT '',
-  deviceId TEXT DEFAULT '',
-  syncStatus INTEGER DEFAULT 0,
   createTime INTEGER NOT NULL,
-  updateTime INTEGER NOT NULL,
   FOREIGN KEY (habitId) REFERENCES habit(id)
 );
 CREATE INDEX IF NOT EXISTS idx_habitlog_habitId ON habit_log(habitId);
 CREATE INDEX IF NOT EXISTS idx_habitlog_date ON habit_log(date);
 
--- 收藏类型表（内置+自定义 + 多端同步）
+-- 收藏类型表（内置+自定义）
 CREATE TABLE IF NOT EXISTS collection_type (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE DEFAULT '',
   label TEXT NOT NULL DEFAULT '',
   isBuiltIn INTEGER DEFAULT 1,
   sortOrder INTEGER DEFAULT 0,
-  deviceId TEXT DEFAULT '',
-  syncStatus INTEGER DEFAULT 0,
-  createTime INTEGER NOT NULL,
-  updateTime INTEGER NOT NULL
+  createTime INTEGER NOT NULL
 );
 
 -- 内置类型种子数据（INSERT OR IGNORE 防止重复）
-INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime, updateTime)
-  VALUES ('sentence', '句子', 1, 1, 0, 0);
-INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime, updateTime)
-  VALUES ('word', '词语', 1, 2, 0, 0);
-INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime, updateTime)
-  VALUES ('quote', '台词', 1, 3, 0, 0);
-INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime, updateTime)
-  VALUES ('knowledge', '知识点', 1, 4, 0, 0);
+INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime)
+  VALUES ('sentence', '句子', 1, 1, 0);
+INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime)
+  VALUES ('word', '词语', 1, 2, 0);
+INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime)
+  VALUES ('quote', '台词', 1, 3, 0);
+INSERT OR IGNORE INTO collection_type (name, label, isBuiltIn, sortOrder, createTime)
+  VALUES ('knowledge', '知识点', 1, 4, 0);
 
--- 收集表（统一抽象 + 多端同步）
+-- 收集表（统一抽象）
 CREATE TABLE IF NOT EXISTS collection (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   type TEXT NOT NULL DEFAULT '',
@@ -307,19 +282,15 @@ CREATE TABLE IF NOT EXISTS collection (
   content TEXT DEFAULT '',
   extra TEXT DEFAULT '',
   tag TEXT DEFAULT '',
-  deviceId TEXT DEFAULT '',
-  syncStatus INTEGER DEFAULT 0,
   createTime INTEGER NOT NULL,
   updateTime INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_collection_type ON collection(type);
 
--- 备忘录表（+ 多端同步）
+-- 备忘录表
 CREATE TABLE IF NOT EXISTS memo (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   content TEXT NOT NULL DEFAULT '',
-  deviceId TEXT DEFAULT '',
-  syncStatus INTEGER DEFAULT 0,
   createTime INTEGER NOT NULL,
   updateTime INTEGER NOT NULL
 );
@@ -335,26 +306,7 @@ CREATE INDEX IF NOT EXISTS idx_memo_createTime ON memo(createTime);
 | id | 自增主键，唯一标识 |
 | createTime | 记录创建时间，Unix 时间戳（毫秒） |
 | updateTime | 记录最后更新时间，Unix 时间戳（毫秒） |
-| deviceId | 写入设备唯一标识，用于多端同步冲突判定 |
-| syncStatus | 同步状态：0=本地已变更待推送  1=已同步到服务器 |
 | TEXT 类型 | SQLite 中 TEXT 可存储任意长度字符串 |
-
----
-
-## Model 层设计
-
-每个功能模块 `feature/<module>/src/main/ets/model/` 下包含对应的数据操作类：
-
-| Model | 文件 | 表 | 核心方法 |
-|-------|------|-----|----------|
-| TaskModel | `feature/task/.../TaskModel.ets` | task | queryByDate / insertChild / toggleComplete / upsertBatch |
-| HabitModel | `feature/habit/.../HabitModel.ets` | habit | queryByCategory / queryTodayHabits |
-| HabitLogModel | `feature/habit/.../HabitLogModel.ets` | habit_log | checkin / queryStreak / queryMonthStats |
-| CollectionModel | `feature/collection/.../CollectionModel.ets` | collection | queryByType / search / queryTags |
-| CollectionTypeModel | `feature/collection/.../CollectionTypeModel.ets` | collection_type | createCustom / queryBuiltIn |
-| MemoModel | `feature/memo/.../MemoModel.ets` | memo | search / quickCreate |
-
-**同步通用接口**：所有 Model 均提供 `queryChangedSince(sinceTime)` + `markSynced(ids)` 用于增量同步。
 
 ---
 

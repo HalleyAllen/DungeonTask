@@ -4,6 +4,9 @@
  */
 import { Collection } from 'core.model';
 import { CollectionRepository } from 'core.database';
+import { Logger } from 'common.util';
+
+const TAG = 'CollectTagVM';
 
 /**
  * 标签统计
@@ -34,26 +37,20 @@ export class CollectionTagManageViewModel {
     try {
       const countMap = new Map<string, number>();
       const all = await this.repo.findAll();
-      console.log(`CollectionTagManage: queryAll returned ${all.length} items`);
       for (const c of all) {
-        if (!c.tag) {
-          console.log(`CollectionTagManage: item id=${c.id} has no tag`);
-          continue;
-        }
+        if (!c.tag) continue;
         const tags = c.tag.split(',').map(s => s.trim()).filter(s => s);
         for (const tag of tags) {
           countMap.set(tag, (countMap.get(tag) || 0) + 1);
         }
       }
-      console.log(`CollectionTagManage: tagCount=${countMap.size}`);
       const newStats: CollectionTagStat[] = [];
       countMap.forEach((count, tag) => {
         newStats.push({ tag, count });
       });
       this.tagStats = newStats;
-
     } catch (e) {
-      console.error('Load collection tags failed:', e);
+      Logger.error(TAG, 'loadTags failed', e);
       this.tagStats = [];
     } finally {
       this.isLoading = false;
@@ -80,26 +77,34 @@ export class CollectionTagManageViewModel {
    * 确认重命名
    */
   async confirmRename(): Promise<void> {
-    const newName = this.editValue.trim();
-    if (!newName || newName === this.editingTag) {
+    try {
+      const newName = this.editValue.trim();
+      if (!newName || newName === this.editingTag) {
+        this.cancelEdit();
+        return;
+      }
+      if (this.tagStats.some(s => s.tag === newName)) {
+        Logger.warn(TAG, `confirmRename: tag "${newName}" already exists`);
+        return;
+      }
+      await this.repo.renameTag(this.editingTag, newName);
       this.cancelEdit();
-      return;
+      await this.loadTags();
+    } catch (e) {
+      Logger.error(TAG, 'confirmRename failed', e);
     }
-    if (this.tagStats.some(s => s.tag === newName)) {
-      console.error('标签已存在');
-      return;
-    }
-    await this.repo.renameTag(this.editingTag, newName);
-    this.cancelEdit();
-    await this.loadTags();
   }
 
   /**
    * 删除标签
    */
   async deleteTag(tag: string): Promise<void> {
-    await this.repo.deleteTag(tag);
-    await this.loadTags();
+    try {
+      await this.repo.deleteTag(tag);
+      await this.loadTags();
+    } catch (e) {
+      Logger.error(TAG, `deleteTag failed: "${tag}"`, e);
+    }
   }
 
   /**

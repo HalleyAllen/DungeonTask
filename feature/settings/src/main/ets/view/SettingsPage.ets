@@ -181,12 +181,9 @@ export struct SettingsPage {
   }
 
   handleItemClick(item: SettingsItem): void {
-    console.log("11111111")
     switch (item.actionId) {
       case 'page_manage':
-        console.log("222222")
         HMRouterMgr.push({pageUrl: 'PageManagePage' });
-        console.log("333333333")
         break;
       case 'sync_generate':
         this.vm.generateSyncCode();

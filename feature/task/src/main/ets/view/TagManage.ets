@@ -2,22 +2,21 @@
  * 标签管理页面
  */
 import { HMRouter, HMRouterMgr } from '@hadss/hmrouter';
-import { EmptyState, TextInputDialog } from 'common.ui';
+import { EmptyState, TextInputDialog, TitleBar } from 'common.ui';
 import { TagManageViewModel, TagStat } from '../viewmodel/TagManageViewModel';
 
 @HMRouter({ pageUrl: 'TagManage' })
 @Component
 export struct TagManagePage {
-   vm: TagManageViewModel = new TagManageViewModel();
-
+  vm: TagManageViewModel = new TagManageViewModel();
   dialogController: CustomDialogController = new CustomDialogController({
     builder: TextInputDialog({
       title: '新建标签',
       placeholder: '请输入标签名称',
       maxLength: 20,
       emptyError: '请输入标签名称',
-      onConfirm: (name: string): string => {
-        return this.vm.createTag(name);
+      onConfirm: async (name: string): Promise<string> => {
+        return await this.vm.createTag(name);
       }
     }),
     autoCancel: true,
@@ -31,7 +30,7 @@ export struct TagManagePage {
 
   build() {
     Column() {
-      this.titleBar()
+      TitleBar({ title: '标签管理', showBack: true, backCallback: () => HMRouterMgr.pop() })
       this.tagList()
 
       // 右下角新建按钮
@@ -40,7 +39,12 @@ export struct TagManagePage {
         .fontColor('#FFFFFF')
         .backgroundColor('#1677FF')
         .borderRadius(24)
-        .padding({ left: 20, right: 20, top: 10, bottom: 10 })
+        .padding({
+          left: 20,
+          right: 20,
+          top: 10,
+          bottom: 10
+        })
         .shadow({ radius: 8, color: 'rgba(22,119,255,0.3)' })
         .position({ right: 20, bottom: 30 })
         .onClick(() => {
@@ -51,32 +55,7 @@ export struct TagManagePage {
     .height('100%')
     .backgroundColor('#F5F5F5')
   }
-
-  @Builder
-  titleBar() {
-    Row() {
-      Text('← 返回')
-        .fontSize(16)
-        .fontColor('#1677FF')
-        .onClick(() => HMRouterMgr.pop())
-
-      Blank()
-
-      Text('标签管理')
-        .fontSize(18)
-        .fontWeight(FontWeight.Bold)
-
-      Blank()
-
-      // 占位保持居中
-      Row()
-        .width(60)
-    }
-    .width('100%')
-    .padding({ left: 16, right: 16, top: 12, bottom: 12 })
-    .backgroundColor('#FFFFFF')
-  }
-
+  
   @Builder
   tagList() {
     if (this.vm.tagStats.length === 0 && !this.vm.isLoading) {
@@ -97,7 +76,7 @@ export struct TagManagePage {
   }
 
   @Builder
-  tagItem(stat:TagStat, index: number) {
+  tagItem(stat: TagStat, index: number) {
     Column() {
       Row() {
         Text(stat.tag)
@@ -122,6 +101,22 @@ export struct TagManagePage {
       }
       .width('100%')
 
+      // 顶栏显示开关
+      Row() {
+        Text('在顶栏显示')
+          .fontSize(13)
+          .fontColor('#666666')
+
+        Blank()
+
+        Toggle({ type: ToggleType.Switch, isOn: stat.showInTopBar })
+          .onChange((isOn: boolean) => {
+            this.vm.toggleShowInTopBar(stat.tag);
+          })
+      }
+      .width('100%')
+      .margin({ top: 8 })
+
       // 引用计数
       Row() {
         if (stat.taskCount > 0) {
@@ -134,7 +129,12 @@ export struct TagManagePage {
           }
           .backgroundColor('#1677FF')
           .borderRadius(4)
-          .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+          .padding({
+            left: 6,
+            right: 6,
+            top: 2,
+            bottom: 2
+          })
         } else {
           Text('暂无引用')
             .fontSize(12)
@@ -145,7 +145,12 @@ export struct TagManagePage {
       .margin({ top: 8 })
     }
     .width('100%')
-    .padding({ top: 14, bottom: 14, left: 16, right: 16 })
+    .padding({
+      top: 14,
+      bottom: 14,
+      left: 16,
+      right: 16
+    })
     .backgroundColor('#FFFFFF')
     .borderRadius(8)
     .margin({ bottom: 8 })

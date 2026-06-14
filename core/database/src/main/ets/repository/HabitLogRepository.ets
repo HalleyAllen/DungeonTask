@@ -1,5 +1,8 @@
 ﻿import { HabitLog } from 'core.model';
 import { getORM } from '@ibestservices/ibest-orm';
+import { Logger } from 'common.util';
+
+const TAG = 'HabitLogRepo';
 
 export class HabitLogRepository {
   async findAll(): Promise<HabitLog[]> {
@@ -8,7 +11,7 @@ export class HabitLogRepository {
       const result = await orm.query(HabitLog).find();
       return result as HabitLog[];
     } catch (e) {
-      console.error('HabitLogRepository.findAll failed:', e);
+      Logger.error(TAG, 'findAll failed', e);
       return [];
     }
   }
@@ -21,7 +24,7 @@ export class HabitLogRepository {
         .find();
       return result as HabitLog[];
     } catch (e) {
-      console.error('HabitLogRepository.findByHabitId failed:', e);
+      Logger.error(TAG, `findByHabitId failed: habitId=${habitId}`, e);
       return [];
     }
   }
@@ -34,7 +37,7 @@ export class HabitLogRepository {
         .first();
       return result as HabitLog | null;
     } catch (e) {
-      console.error('HabitLogRepository.findById failed:', e);
+      Logger.error(TAG, `findById failed: id=${id}`, e);
       return null;
     }
   }
@@ -43,9 +46,10 @@ export class HabitLogRepository {
     try {
       const orm = getORM();
       const result = await orm.insert(log);
+      Logger.debug(TAG, `insert: id=${log.id}, habitId=${log.habitId}`);
       return result as number;
     } catch (e) {
-      console.error('HabitLogRepository.insert failed:', e);
+      Logger.error(TAG, 'insert failed', e);
       return 0;
     }
   }
@@ -56,7 +60,7 @@ export class HabitLogRepository {
       const result = await orm.save(log);
       return result as number;
     } catch (e) {
-      console.error('HabitLogRepository.update failed:', e);
+      Logger.error(TAG, `update failed: id=${log.id}`, e);
       return 0;
     }
   }
@@ -69,7 +73,7 @@ export class HabitLogRepository {
         .first();
       return result as HabitLog | null;
     } catch (e) {
-      console.error('HabitLogRepository.findByDate failed:', e);
+      Logger.error(TAG, `findByDate failed: habitId=${habitId}, date=${date}`, e);
       return null;
     }
   }
@@ -93,7 +97,7 @@ export class HabitLogRepository {
       log.actualDuration = actualDuration;
       return await this.insert(log);
     } catch (e) {
-      console.error('HabitLogRepository.checkin failed:', e);
+      Logger.error(TAG, `checkin failed: habitId=${habitId}, date=${date}`, e);
       return 0;
     }
   }
@@ -110,7 +114,7 @@ export class HabitLogRepository {
       }
       return 0;
     } catch (e) {
-      console.error('HabitLogRepository.deleteById failed:', e);
+      Logger.error(TAG, `deleteById failed: id=${id}`, e);
       return 0;
     }
   }

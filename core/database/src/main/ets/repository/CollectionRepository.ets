@@ -1,5 +1,8 @@
 ﻿import { Collection } from 'core.model';
 import { getORM } from '@ibestservices/ibest-orm';
+import { Logger } from 'common.util';
+
+const TAG = 'CollectionRepo';
 
 export class CollectionRepository {
   async findAll(): Promise<Collection[]> {
@@ -8,7 +11,7 @@ export class CollectionRepository {
       const result = await orm.query(Collection).find();
       return result as Collection[];
     } catch (e) {
-      console.error('CollectionRepository.findAll failed:', e);
+      Logger.error(TAG, 'findAll failed', e);
       return [];
     }
   }
@@ -21,7 +24,7 @@ export class CollectionRepository {
         .find();
       return result as Collection[];
     } catch (e) {
-      console.error('CollectionRepository.findByType failed:', e);
+      Logger.error(TAG, `findByType failed: "${typeName}"`, e);
       return [];
     }
   }
@@ -37,7 +40,7 @@ export class CollectionRepository {
       }
       return Array.from(tagSet);
     } catch (e) {
-      console.error('CollectionRepository.queryTags failed:', e);
+      Logger.error(TAG, 'queryTags failed', e);
       return [];
     }
   }
@@ -50,7 +53,7 @@ export class CollectionRepository {
         .first();
       return result as Collection | null;
     } catch (e) {
-      console.error('CollectionRepository.findById failed:', e);
+      Logger.error(TAG, `findById failed: id=${id}`, e);
       return null;
     }
   }
@@ -59,9 +62,10 @@ export class CollectionRepository {
     try {
       const orm = getORM();
       const result = await orm.insert(collection);
+      Logger.debug(TAG, `insert: id=${collection.id}`);
       return result as number;
     } catch (e) {
-      console.error('CollectionRepository.insert failed:', e);
+      Logger.error(TAG, 'insert failed', e);
       return 0;
     }
   }
@@ -72,7 +76,7 @@ export class CollectionRepository {
       const result = await orm.save(collection);
       return result as number;
     } catch (e) {
-      console.error('CollectionRepository.update failed:', e);
+      Logger.error(TAG, `update failed: id=${collection.id}`, e);
       return 0;
     }
   }
@@ -89,7 +93,7 @@ export class CollectionRepository {
       }
       return 0;
     } catch (e) {
-      console.error('CollectionRepository.deleteById failed:', e);
+      Logger.error(TAG, `deleteById failed: id=${id}`, e);
       return 0;
     }
   }
@@ -111,8 +115,9 @@ export class CollectionRepository {
           await orm.save(item);
         }
       }
+      Logger.info(TAG, `renameTag: "${oldName}" -> "${newName}"`);
     } catch (e) {
-      console.error('CollectionRepository.renameTag failed:', e);
+      Logger.error(TAG, `renameTag failed: "${oldName}" -> "${newName}"`, e);
     }
   }
 
@@ -131,8 +136,9 @@ export class CollectionRepository {
           await orm.save(item);
         }
       }
+      Logger.info(TAG, `deleteTag: "${tagName}"`);
     } catch (e) {
-      console.error('CollectionRepository.deleteTag failed:', e);
+      Logger.error(TAG, `deleteTag failed: "${tagName}"`, e);
     }
   }
 }

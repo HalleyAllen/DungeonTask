@@ -11,8 +11,10 @@ import {
   EditPageParams
 } from 'core.model';
 import { CollectionRepository, CollectionTypeRepository } from 'core.database';
-import { DateUtil } from 'common.util';
+import { DateUtil, Logger } from 'common.util';
 import { HMRouterMgr } from '@hadss/hmrouter';
+
+const TAG = 'CollectEditVM';
 
 @ObservedV2
 export class CollectionEditViewModel {
@@ -58,12 +60,16 @@ export class CollectionEditViewModel {
    * 初始化（根据路由参数判断新增/编辑）
    */
   async init(params: EditPageParams | undefined): Promise<void> {
-    await this.loadTypes();
-    await this.loadAllTags();
-    if (params && params.id) {
-      this.isEdit = true;
-      this.itemId = params.id;
-      await this.loadItem();
+    try {
+      await this.loadTypes();
+      await this.loadAllTags();
+      if (params && params.id) {
+        this.isEdit = true;
+        this.itemId = params.id;
+        await this.loadItem();
+      }
+    } catch (e) {
+      Logger.error(TAG, 'init failed', e);
     }
   }
 
@@ -84,7 +90,7 @@ export class CollectionEditViewModel {
       }
       this.types = list;
     } catch (e) {
-      console.error('Load types failed:', e);
+      Logger.error(TAG, 'loadTypes failed', e);
     }
   }
 
@@ -95,7 +101,7 @@ export class CollectionEditViewModel {
     try {
       this.allTags = await this.collectionRepo.queryTags();
     } catch (e) {
-      console.error('Load tags failed:', e);
+      Logger.error(TAG, 'loadAllTags failed', e);
     }
   }
 
@@ -114,7 +120,7 @@ export class CollectionEditViewModel {
         this.parseExtra(item.extra);
       }
     } catch (e) {
-      console.error('Load item failed:', e);
+      Logger.error(TAG, 'loadItem failed', e);
     }
   }
 
@@ -123,13 +129,13 @@ export class CollectionEditViewModel {
    */
   async save(): Promise<boolean> {
     if (!this.title.trim()) {
-      console.warn('CollectionEdit save aborted: title is empty');
+      Logger.warn(TAG, 'save aborted: title is empty');
       return false;
     }
 
     try {
       const tagStr = this.selectedTags.join(',');
-      console.info(`CollectionEdit save: title="${this.title}", type="${this.itemType}", tags="${tagStr}"`);
+      Logger.info(TAG, `save: title="${this.title}", type="${this.itemType}", tags="${tagStr}"`);
       if (this.isEdit) {
         const item: Collection | null = await this.collectionRepo.findById(this.itemId);
         if (item) {
@@ -139,7 +145,7 @@ export class CollectionEditViewModel {
           item.extra = this.buildExtra();
           item.tag = tagStr;
           await this.collectionRepo.update(item);
-          console.info('CollectionEdit update success, id=' + item.id);
+          Logger.info(TAG, 'update success, id=' + item.id);
         }
       } else {
         const collection = new Collection();
@@ -151,11 +157,11 @@ export class CollectionEditViewModel {
         collection.createTime = DateUtil.getNow();
         collection.updateTime = DateUtil.getNow();
         const newId = await this.collectionRepo.insert(collection);
-        console.info('CollectionEdit insert success, newId=' + newId);
+        Logger.info(TAG, 'insert success, newId=' + newId);
       }
       return true;
     } catch (e) {
-      console.error('Save collection failed:', e);
+      Logger.error(TAG, 'save failed', e);
       return false;
     }
   }
@@ -298,7 +304,7 @@ export class CollectionEditViewModel {
       // 自动选中新类型
       this.itemType = result.name;
     } catch (e) {
-      console.error('Create type failed:', e);
+      Logger.error(TAG, 'createNewType failed', e);
     }
   }
 

@@ -169,11 +169,9 @@ export class TaskViewModel {
    * 保存排序结果
    */
   async saveOrder(tasks: Task[]): Promise<void> {
-    const sortItems: SortOrderItem[] = tasks.map(t => ({
-      id: t.id,
-      sortOrder: t.sortOrder,
-      priority: t.priority
-    } as SortOrderItem));
+    const sortItems: SortOrderItem[] = tasks.map((t: Task): SortOrderItem => {
+      return { id: t.id, sortOrder: t.sortOrder, priority: t.priority };
+    });
     await this.taskRepository.updateSortOrders(sortItems);
     await this.loadTasks(this.currentDate);
   }

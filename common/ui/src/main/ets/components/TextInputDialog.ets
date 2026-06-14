@@ -14,8 +14,8 @@ export struct TextInputDialog {
   maxLength: number = 20;
   /** 输入框空值时的错误提示 */
   emptyError: string = '请输入内容';
-  /** 确认回调，返回空字符串=成功关闭，返回非空=显示错误 */
-  onConfirm?: (value: string) => string;
+  /** 确认回调，返回空字符串=成功关闭，返回非空=显示错误（支持同步/异步） */
+  onConfirm?: (value: string) => string | Promise<string>;
   @State inputValue: string = '';
   @State errorText: string = '';
 
@@ -84,14 +84,14 @@ export struct TextInputDialog {
     .borderRadius(12)
   }
 
-  tryConfirm(): void {
+  async tryConfirm(): Promise<void> {
     const value = this.inputValue.trim();
     if (!value) {
       this.errorText = this.emptyError;
       return;
     }
     if (this.onConfirm) {
-      const err = this.onConfirm(value);
+      const err = await this.onConfirm(value);
       if (!err) {
         this.errorText = '';
         this.controller.close();

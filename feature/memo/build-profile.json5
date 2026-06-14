@@ -22,8 +22,8 @@
             "./consumer-rules.txt"
           ]
         }
-      },
-    },
+      }
+    }
   ],
   "targets": [
     {

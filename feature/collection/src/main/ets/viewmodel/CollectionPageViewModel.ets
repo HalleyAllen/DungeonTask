@@ -4,6 +4,9 @@
  */
 import { Collection, CollectionType } from 'core.model';
 import { CollectionRepository, CollectionTypeRepository } from 'core.database';
+import { Logger } from 'common.util';
+
+const TAG = 'CollectPageVM';
 
 /** 类型筛选配置 */
 export interface TypeOption {
@@ -21,6 +24,14 @@ export class CollectionPageViewModel {
   private collectionRepo: CollectionRepository = new CollectionRepository();
   private typeRepo: CollectionTypeRepository = new CollectionTypeRepository();
 
+  /**
+   * 页面可见时刷新
+   */
+  async refresh(): Promise<void> {
+    await this.loadTypes();
+    await this.loadCollections();
+  }
+
   async loadTypes(): Promise<void> {
     try {
       const typeList: CollectionType[] = await this.typeRepo.findAll();
@@ -36,7 +47,7 @@ export class CollectionPageViewModel {
       }
       this.typeOptions = list;
     } catch (e) {
-      console.error('Load types failed:', e);
+      Logger.error(TAG, 'loadTypes failed', e);
     }
   }
 
@@ -48,7 +59,7 @@ export class CollectionPageViewModel {
         this.collections = await this.collectionRepo.findAll();
       }
     } catch (e) {
-      console.error('Load collections failed:', e);
+      Logger.error(TAG, 'loadCollections failed', e);
     }
   }
 
@@ -57,7 +68,7 @@ export class CollectionPageViewModel {
       await this.collectionRepo.deleteById(id);
       await this.loadCollections();
     } catch (e) {
-      console.error('Delete collection failed:', e);
+      Logger.error(TAG, 'deleteCollection failed', e);
     }
   }
 

@@ -4,6 +4,9 @@
  */
 import { Memo } from 'core.model';
 import { MemoRepository } from 'core.database';
+import { Logger } from 'common.util';
+
+const TAG = 'MemoPageVM';
 
 @Observed
 export class MemoPageViewModel {
@@ -11,6 +14,13 @@ export class MemoPageViewModel {
   searchText: string = '';
 
   private repo: MemoRepository = new MemoRepository();
+
+  /**
+   * 页面可见时刷新
+   */
+  async refresh(): Promise<void> {
+    await this.loadMemos();
+  }
 
   async loadMemos(): Promise<void> {
     try {
@@ -20,7 +30,7 @@ export class MemoPageViewModel {
         this.memos = await this.repo.findAll();
       }
     } catch (e) {
-      console.error('Load memos failed:', e);
+      Logger.error(TAG, 'loadMemos failed', e);
     }
   }
 
@@ -29,7 +39,7 @@ export class MemoPageViewModel {
       await this.repo.deleteById(id);
       await this.loadMemos();
     } catch (e) {
-      console.error('Delete memo failed:', e);
+      Logger.error(TAG, 'deleteMemo failed', e);
     }
   }
 }

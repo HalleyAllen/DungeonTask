@@ -4,7 +4,9 @@
  */
 import { Habit, HabitLog } from 'core.model';
 import { HabitRepository, HabitLogRepository } from 'core.database';
-import { DateUtil } from 'common.util';
+import { DateUtil, Logger } from 'common.util';
+
+const TAG = 'HabitPageVM';
 
 @Observed
 export class HabitPageViewModel {
@@ -22,31 +24,42 @@ export class HabitPageViewModel {
       this.habits = await this.habitRepo.findAll();
       await this.loadTodayCheckin();
     } catch (e) {
-      console.error('Load habits failed:', e);
+      Logger.error(TAG, 'loadHabits failed', e);
     } finally {
       this.isLoading = false;
     }
   }
 
+  /**
+   * 页面可见时刷新
+   */
+  async refresh(): Promise<void> {
+    await this.loadHabits();
+  }
+
   async loadTodayCheckin(): Promise<void> {
-    const today = DateUtil.getToday();
-    const todayWeekDay = DateUtil.getTodayWeekDay();
+    try {
+      const today = DateUtil.getToday();
+      const todayWeekDay = DateUtil.getTodayWeekDay();
 
-    for (const habit of this.habits) {
-      let isToday = false;
-      if (habit.frequency === 1) {
-        isToday = true;
-      } else if (habit.frequency === 2 && habit.weekDays) {
-        isToday = habit.weekDays.split(',').includes(String(todayWeekDay));
+      for (const habit of this.habits) {
+        let isToday = false;
+        if (habit.frequency === 1) {
+          isToday = true;
+        } else if (habit.frequency === 2 && habit.weekDays) {
+          isToday = habit.weekDays.split(',').includes(String(todayWeekDay));
+        }
+
+        if (!isToday) continue;
+
+        const log: HabitLog | null = await this.logRepo.findByDate(habit.id, today);
+        if (log) {
+          this.todayChecked.set(habit.id, log.completed === 1);
+          this.todayLogs.set(habit.id, log);
+        }
       }
-
-      if (!isToday) continue;
-
-      const log: HabitLog | null = await this.logRepo.findByDate(habit.id, today);
-      if (log) {
-        this.todayChecked.set(habit.id, log.completed === 1);
-        this.todayLogs.set(habit.id, log);
-      }
+    } catch (e) {
+      Logger.error(TAG, 'loadTodayCheckin failed', e);
     }
   }
 
@@ -76,7 +89,7 @@ export class HabitPageViewModel {
       }
       await this.loadTodayCheckin();
     } catch (e) {
-      console.error('Toggle checkin failed:', e);
+      Logger.error(TAG, 'toggleCheckin failed', e);
     }
   }
 
