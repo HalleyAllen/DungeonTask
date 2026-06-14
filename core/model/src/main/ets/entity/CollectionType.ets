@@ -13,6 +13,12 @@ export class CollectionType {
   isBuiltIn: number = 0;
   /** 排序 */
   sortOrder: number = 0;
+  /** 同步状态：0=未同步 1=已同步 */
+  syncStatus: number = 0;
+  /** 设备ID */
+  deviceId: string = '';
   /** 创建时间戳(ms) */
   createTime: number = 0;
+  /** 更新时间戳(ms) */
+  updateTime: number = 0;
 }
