@@ -3,7 +3,7 @@
  */
 import { HMRouter } from '@hadss/hmrouter';
 import { Task } from 'core.model';
-import { TaskViewModel, DateFilterOption } from '../viewmodel/TaskViewModel';
+import { TaskViewModel } from '../viewmodel/TaskViewModel';
 import { EmptyState, FloatingActionButton, TitleBar } from 'common.ui';
 
 @HMRouter({ pageUrl: 'TaskPage' })
@@ -26,7 +26,7 @@ export struct TaskPage {
           .height(40)
           .bindMenu(this.SettingsMenuBuilder)
       }
-      this.dateFilterBar()
+
       this.tagFilterBar()
       this.taskList()
       FloatingActionButton({
@@ -41,35 +41,13 @@ export struct TaskPage {
 
   }
 
-  // ---- 日期筛选栏 ----
-  @Builder
-  dateFilterBar() {
-    Row() {
-      ForEach(this.viewModel.dateFilterOptions, (opt: DateFilterOption) => {
-        Text(opt.label)
-          .fontSize(14)
-          .fontColor(this.viewModel.currentDateFilter === opt.value ? '#FFFFFF' : '#1F1F1F')
-          .backgroundColor(this.viewModel.currentDateFilter === opt.value ? '#1677FF' : '#F5F5F5')
-          .borderRadius(16)
-          .padding({ left: 16, right: 16, top: 8, bottom: 8 })
-          .margin({ right: 8 })
-          .onClick(() => {
-            this.viewModel.filterByDate(opt.value);
-          })
-      })
-    }
-    .width('100%')
-    .padding({ left: 16, bottom: 8 })
-    .backgroundColor('#FFFFFF')
-  }
-
   // ---- 标签筛选栏 ----
   @Builder
   tagFilterBar() {
     List() {
       // 全部（固定第一项）
       ListItem() {
-        Row(){
+        Row() {
           Text('全部')
             .fontSize(14)
             .fontColor(!this.viewModel.currentTag ? '#FFFFFF' : '#1F1F1F')
@@ -80,10 +58,14 @@ export struct TaskPage {
             .fontSize(14)
             .fontColor(!this.viewModel.currentTag ? '#FFFFFF' : '#1F1F1F')
             .borderRadius(4)
-            .padding({left:8})
             .bindMenu(this.TagMenuBuilder)
         }
-        .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+        .padding({
+          left: 16,
+          right: 16,
+          top: 8,
+          bottom: 8
+        })
         .backgroundColor(!this.viewModel.currentTag ? '#1677FF' : '#F5F5F5')
         .borderRadius(16)
       }
@@ -92,7 +74,12 @@ export struct TaskPage {
         ListItem() {
           Text(tag)
             .fontSize(14)
-            .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+            .padding({
+              left: 16,
+              right: 16,
+              top: 8,
+              bottom: 8
+            })
             .backgroundColor(this.viewModel.currentTag === tag ? '#1677FF' : '#F5F5F5')
             .fontColor(this.viewModel.currentTag === tag ? '#FFFFFF' : '#1F1F1F')
             .borderRadius(16)
@@ -223,7 +210,12 @@ export struct TaskPage {
                   .fontColor('#1677FF')
                   .backgroundColor('#E6F4FF')
                   .borderRadius(4)
-                  .padding({ left: 6, right: 6, top: 2, bottom: 2 })
+                  .padding({
+                    left: 6,
+                    right: 6,
+                    top: 2,
+                    bottom: 2
+                  })
                   .margin({ right: 4, top: 6 })
               })
           }
@@ -242,7 +234,12 @@ export struct TaskPage {
       }
     }
     .width('100%')
-    .padding({ top: 12, bottom: 12, left: 12, right: 12 })
+    .padding({
+      top: 12,
+      bottom: 12,
+      left: 12,
+      right: 12
+    })
     .backgroundColor('#FFFFFF')
     .borderRadius(8)
     .margin({ bottom: 8 })

@@ -1,8 +1,8 @@
 ﻿/**
  * 任务列表 ViewModel
  */
-import { Task, SortOrderItem } from 'core.model';
-import { TaskRepository, TagRepository } from 'core.database';
+import { SortOrderItem, Task } from 'core.model';
+import { TagRepository, TaskRepository } from 'core.database';
 import { DateUtil } from 'common.util';
 import { HMRouterMgr } from '@hadss/hmrouter';
 
@@ -16,13 +16,7 @@ export interface DateFilterOption {
 export class TaskViewModel {
   taskList: Task[] = [];
   /** 顶栏显示的标签列表（从 Tag 表可见标签加载） */
-  filterTags: string[] = [];
-  /** 日期筛选选项 */
-  dateFilterOptions: DateFilterOption[] = [
-    { label: '今天', value: 'today' },
-    { label: '本周', value: 'week' },
-    { label: '全部', value: 'all' }
-  ];
+  filterTags: string[] = ["全部"];
   /** 当前选中标签（'' 表示全部） */
   currentTag: string = '';
   /** 日期筛选：'today' | 'week' | 'all' */
@@ -30,11 +24,9 @@ export class TaskViewModel {
   currentDate: string = '';
   isLoading: boolean = false;
   errorMessage: string = '';
-
   // ---- 拖拽排序 ----
   isReordering: boolean = false;
   dragList: Task[] = [];
-
   private taskRepository: TaskRepository = new TaskRepository();
   private tagRepo: TagRepository = new TagRepository();
 
